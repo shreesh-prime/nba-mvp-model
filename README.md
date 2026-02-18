@@ -7,54 +7,94 @@ Predict the NBA MVP using **advanced stats** from Basketball Reference. The pipe
 3. **Train a model** – Random Forest trained on the top correlated stats to predict MVP (binary: winner vs non-winner).
 4. **Predict this season** – Score current-season players and rank top MVP candidates.
 
-## Setup
+## Setup and run
+
+Run everything from the **folder that contains** `mvp_model.py`, `app.py`, and `requirements.txt` (the repo root). For example, if you have:
+
+```
+nba-model/
+  nba-mvp-model/    ← go here (this is the repo root)
+    mvp_model.py
+    app.py
+    requirements.txt
+    data/
+    ...
+```
+
+then:
 
 ```bash
-cd "nba model"
+cd nba-model/nba-mvp-model
 pip install -r requirements.txt
 ```
 
-## GitHub and local web app (port 8080)
+All commands below are run from that same folder (where the Python files live).
 
-### Put the project on GitHub
+## Run the pipeline
 
-1. **Create a repo** on GitHub (e.g. `nba-mvp-model`). Do not add a README/license if you already have them locally.
+**Full pipeline** (fetch data, backtest, formula, train, predict):
 
-2. **From the project folder:**
+```bash
+python mvp_model.py
+```
 
-   ```bash
-   cd "/path/to/nba model"
-   git init
-   git add .
-   git commit -m "Initial commit: NBA MVP prediction model"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/nba-mvp-model.git
-   git push -u origin main
-   ```
+**Backtest and formula only:**
 
-3. **`.gitignore`** is set so data files and model artifacts (e.g. `data/historical_advanced.csv`, `model/*.joblib`) are not committed. Others can clone and run the pipeline to regenerate them.
+```bash
+python mvp_model.py backtest
+```
 
-### Run the web app locally on port 8080
+**Predict current season** (after training once):
 
-A small Flask app serves the **formula**, **backtest results**, and **correlations** in the browser.
+```bash
+python predict_mvp.py
+```
 
-1. **Install and run:**
+## Web app on port 8080
 
-   ```bash
-   pip install -r requirements.txt
-   python app.py
-   ```
+From the folder that contains `app.py`:
 
-2. **Open:** [http://localhost:8080](http://localhost:8080)
+```bash
+pip install -r requirements.txt
+python3 app.py
+```
 
-3. **Optional:** Generate data first so the page has content:
+Then open **[http://localhost:8080](http://localhost:8080)**. You get:
 
-   ```bash
-   python mvp_model.py
-   python app.py
-   ```
+- **Dropdown by year** — Pick a season (2000–01 through 2025–26).
+- **Historical seasons** — Shows **predicted MVP** vs **actual MVP** and whether they match.
+- **2025–26** — Shows **predicted winner** (and top 10) based on current stats; actual MVP TBD at end of season.
 
-   Then refresh [http://localhost:8080](http://localhost:8080) to see the formula, backtest table, and stat correlations.
+Run the pipeline once so the app has backtest and model data:
+
+```bash
+python3 mvp_model.py
+python3 app.py
+```
+
+## Keep 2025–26 prediction updated daily
+
+To refresh current-season stats and update the model’s prediction every day:
+
+```bash
+python3 update_data.py
+```
+
+This fetches the latest 2025–26 advanced stats from Basketball Reference and overwrites `data/current_season_prediction.json`. The app reads that file for the “2025–26” tab.
+
+**Cron example** (run every day at 6 AM):
+
+```bash
+0 6 * * * cd /path/to/nba-mvp-model && python3 update_data.py
+```
+
+Replace `/path/to/nba-mvp-model` with the folder that contains `update_data.py`.
+
+## GitHub
+
+- **Clone:** `git clone https://github.com/YOUR_USERNAME/nba-mvp-model.git && cd nba-mvp-model` (then run commands from that folder; if you put it inside another folder like `nba-model`, use `cd nba-model/nba-mvp-model`)
+- **Push changes:** `git add . && git commit -m "..." && git push`
+- **`.gitignore`** keeps data and model files out of the repo; anyone who clones can run the pipeline to regenerate them.
 
 ## Usage
 
