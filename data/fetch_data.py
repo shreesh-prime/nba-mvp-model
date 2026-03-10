@@ -1,10 +1,59 @@
 """
 Fetch NBA data: MVP history (Basketball Reference), player stats & standings (nba_api).
 """
+import ssl
+import certifi
+
+# Fix SSL certificate verification on macOS (Python.org installs don't use system certs)
+_ctx = ssl.create_default_context(cafile=certifi.where())
+ssl._create_default_https_context = lambda: _ctx
+
+import io
 import time
+import random
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+
+# Browser-like User-Agent to reduce 403/429 from Basketball Reference
+BR_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+
+# Minimum delay between BR requests (seconds) to avoid 429
+BR_DELAY_MIN = 2.0
+BR_DELAY_MAX = 4.0
+
+
+def _br_delay():
+    """Sleep between BR requests to avoid rate limiting."""
+    time.sleep(random.uniform(BR_DELAY_MIN, BR_DELAY_MAX))
+
+
+def _fetch_br_html(url: str, max_retries: int = 4) -> str | None:
+    """Fetch HTML from Basketball Reference with retries and backoff on 429."""
+    for attempt in range(max_retries):
+        try:
+            r = requests.get(url, headers=BR_HEADERS, timeout=20)
+            if r.status_code == 429:
+                wait = int(r.headers.get("Retry-After", 90))
+                wait = min(wait, 120)
+                print(f"  Rate limited (429). Waiting {wait}s before retry...")
+                time.sleep(wait)
+                continue
+            r.raise_for_status()
+            return r.text
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                wait = 90
+                print(f"  Rate limited. Waiting {wait}s...")
+                time.sleep(wait)
+                continue
+            if e.response.status_code == 403:
+                return None
+            raise
+        except Exception:
+            time.sleep(BR_DELAY_MAX)
+            continue
+    return None
 
 
 def fetch_mvp_history() -> pd.DataFrame:
@@ -13,12 +62,23 @@ def fetch_mvp_history() -> pd.DataFrame:
     Returns DataFrame with columns: season, player, team_abbr, age, etc.
     """
     url = "https://www.basketball-reference.com/awards/mvp.html"
-    # pandas read_html works well on BR tables
-    tables = pd.read_html(url)
-    # First table is NBA winners (second might be ABA)
+    html = _fetch_br_html(url)
+    if not html:
+        return pd.DataFrame()
+    tables = pd.read_html(io.StringIO(html))
     df = tables[0]
-    # Rename columns for consistency (BR uses 'Season', 'Player', 'Tm', etc.)
-    df = df.rename(columns={
+    # BR MVP table has multi-level columns: level 0 = group names, level 1 = "Season", "Player", "Tm"
+    if isinstance(df.columns, pd.MultiIndex):
+        for level in range(df.columns.nlevels - 1, -1, -1):
+            lev = df.columns.get_level_values(level)
+            if "Season" in lev.values or "Player" in lev.values:
+                df.columns = lev
+                break
+        else:
+            df.columns = df.columns.get_level_values(0)
+    df.columns = df.columns.str.strip()
+    # Map BR column names to our names (only columns that exist)
+    rename_map = {
         "Season": "season",
         "Player": "player",
         "Tm": "team_abbr",
@@ -35,11 +95,33 @@ def fetch_mvp_history() -> pd.DataFrame:
         "FT%": "ft_pct",
         "WS": "win_shares",
         "WS/48": "ws_per_48",
-    })
-    # Filter to NBA only (drop ABA rows if present) and recent decades for modeling
+    }
+    df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
+    # Ensure we have a season column (BR may use different header or multi-index)
+    if "season" not in df.columns:
+        for cand in ("Season", "season", "Year", "Yr"):
+            if cand in df.columns:
+                df["season"] = df[cand].astype(str)
+                break
+        if "season" not in df.columns and len(df.columns):
+            df["season"] = df.iloc[:, 0].astype(str)
+    # Ensure we have a player column - must be actual player names, not league (Lg = "NBA")
+    if "player" not in df.columns:
+        for cand in ("Player", "player", "Name", "NAME"):
+            if cand in df.columns:
+                df["player"] = df[cand].astype(str).str.strip()
+                break
+        if "player" not in df.columns and len(df.columns) >= 2:
+            for i in range(1, min(6, len(df.columns))):
+                col = df.iloc[:, i].astype(str).str.strip()
+                sample = col.iloc[0] if len(col) else ""
+                if sample and sample not in ("NBA", "ABA") and not sample.isdigit() and len(sample) > 2:
+                    df["player"] = col
+                    break
+            if "player" not in df.columns:
+                df["player"] = df.iloc[:, 1].astype(str).str.strip()
     if "Lg" in df.columns:
         df = df[df["Lg"] == "NBA"].copy()
-    # Season format: "2023-24" -> keep as is for joining
     df["season"] = df["season"].astype(str)
     return df
 
@@ -86,12 +168,20 @@ def fetch_advanced_stats_br(season: str) -> pd.DataFrame:
     full_year = "20" + year
     url = f"https://www.basketball-reference.com/leagues/NBA_{full_year}_advanced.html"
     try:
-        tables = pd.read_html(url)
+        html = _fetch_br_html(url)
+        if not html:
+            raise FileNotFoundError("No response")
+        tables = pd.read_html(io.StringIO(html))
         df = tables[0]
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        df.columns = df.columns.str.strip()
         # Remove repeated header rows
-        df = df[df["Rk"] != "Rk"].copy()
+        if "Rk" in df.columns:
+            df = df[df["Rk"] != "Rk"].copy()
         df["season"] = season
-        df["Player"] = df["Player"].str.replace(r"\*", "", regex=True)
+        if "Player" in df.columns:
+            df["Player"] = df["Player"].str.replace(r"\*", "", regex=True)
         # Standardize column names (BR uses PER, TS%, WS, WS/48, BPM, VORP, etc.)
         rename = {
             "Player": "player",
@@ -121,9 +211,91 @@ def fetch_advanced_stats_br(season: str) -> pd.DataFrame:
             "VORP": "vorp",
         }
         df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
+        if "player" not in df.columns and len(df.columns) >= 2:
+            df["player"] = df.iloc[:, 1].astype(str).str.strip()
+        _br_delay()
         return df
     except Exception as e:
         print(f"BR advanced failed for {season}: {e}")
+        return pd.DataFrame()
+
+
+def fetch_per_game_stats_br(season: str, min_games: int = 41) -> pd.DataFrame:
+    """Fetch per-game PTS, TRB, AST from BR per_game table. One row per player (primary team)."""
+    year = season.split("-")[1]
+    full_year = "20" + year
+    url = f"https://www.basketball-reference.com/leagues/NBA_{full_year}_per_game.html"
+    try:
+        html = _fetch_br_html(url)
+        if not html:
+            raise FileNotFoundError("No response")
+        tables = pd.read_html(io.StringIO(html))
+        df = tables[0]
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        df.columns = df.columns.str.strip()
+        if "Rk" in df.columns:
+            df = df[df["Rk"] != "Rk"].copy()
+        if "Player" in df.columns:
+            df["Player"] = df["Player"].str.replace(r"\*", "", regex=True)
+        rename = {"Player": "player", "Tm": "team_abbr", "G": "games", "PTS": "ppg", "TRB": "rpg", "AST": "apg"}
+        df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
+        if "player" not in df.columns and len(df.columns) >= 2:
+            df["player"] = df.iloc[:, 1].astype(str).str.strip()
+        for c in ["games", "ppg", "rpg", "apg"]:
+            if c in df.columns:
+                df[c] = pd.to_numeric(df[c], errors="coerce")
+        df = df[df["games"].fillna(0) >= min_games].copy()
+        df["season"] = season
+        if "player" in df.columns and df["player"].duplicated().any():
+            df = df.sort_values("games", ascending=False).drop_duplicates(subset=["player", "season"], keep="first")
+        cols = [c for c in ["player", "team_abbr", "season", "ppg", "rpg", "apg", "games"] if c in df.columns]
+        _br_delay()
+        return df[cols].copy() if "player" in cols and "ppg" in cols else pd.DataFrame()
+    except Exception as e:
+        print(f"BR per_game failed for {season}: {e}")
+        return pd.DataFrame()
+
+
+def fetch_standings_br(season: str) -> pd.DataFrame:
+    """Fetch team wins from BR standings. Returns team_abbr, season, team_wins."""
+    year = season.split("-")[1]
+    full_year = "20" + year
+    url = f"https://www.basketball-reference.com/leagues/NBA_{full_year}_standings.html"
+    try:
+        html = _fetch_br_html(url)
+        if not html:
+            return pd.DataFrame()
+        tables = pd.read_html(io.StringIO(html))
+        if not tables:
+            return pd.DataFrame()
+        df = pd.concat([tables[0], tables[1]], ignore_index=True) if len(tables) >= 2 else tables[0]
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        df.columns = df.columns.str.strip()
+        if "W" not in df.columns:
+            return pd.DataFrame()
+        df["W"] = pd.to_numeric(df["W"], errors="coerce")
+        soup = BeautifulSoup(html, "lxml")
+        team_abbrs = []
+        for a in soup.select("a[href*='/teams/']"):
+            href = a.get("href", "")
+            parts = href.split("/")
+            if len(parts) >= 3 and len(parts[2]) == 3 and parts[2] not in team_abbrs:
+                team_abbrs.append(parts[2])
+        if len(team_abbrs) >= len(df):
+            df = df.head(len(team_abbrs)).copy()
+            df["team_abbr"] = team_abbrs[: len(df)]
+        elif "Team" in df.columns:
+            df["team_abbr"] = df["Team"].astype(str).str[:3].str.upper()
+        else:
+            return pd.DataFrame()
+        df["season"] = season
+        df = df.rename(columns={"W": "team_wins"})
+        _br_delay()
+        return df[["team_abbr", "season", "team_wins"]].dropna(subset=["team_wins"])
+    except Exception as e:
+        print(f"BR standings failed for {season}: {e}")
         return pd.DataFrame()
 
 
@@ -132,12 +304,38 @@ def get_season_list(start_year: int = 2000, end_year: int = 2025) -> list[str]:
     return [f"{y}-{str(y+1)[-2:]}" for y in range(start_year, end_year)]
 
 
+def _normalize_season(s: str) -> str:
+    """Normalize season to YYYY-YY (e.g. 2000-01)."""
+    s = str(s).strip()
+    if "-" in s:
+        a, b = s.split("-", 1)
+        a, b = a.strip(), b.strip()
+        if len(b) == 1 and b.isdigit():
+            b = "0" + b
+        return f"{a}-{b}"
+    return s
+
+
+def _normalize_player_name(s: str) -> str:
+    """Normalize for matching: strip, remove *, unicode to ASCII."""
+    import unicodedata
+    if pd.isna(s) or s is None:
+        return ""
+    s = str(s).strip().replace("*", "").replace(".", "")
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().strip()
+    return s
+
+
 # Advanced stat columns used for correlation and modeling (numeric only).
 ADVANCED_STAT_COLUMNS = [
     "per", "ts_pct", "fg3ar", "ftr", "orb_pct", "drb_pct", "trb_pct",
     "ast_pct", "stl_pct", "blk_pct", "tov_pct", "usg_pct",
     "ows", "dws", "ws", "ws_per_48", "obpm", "dbpm", "bpm", "vorp",
 ]
+# Regular box-score and team context. Team success is the strongest MVP predictor (top-3 seed).
+REGULAR_AND_WINS_COLUMNS = ["ppg", "rpg", "apg", "team_wins", "team_win_rank", "top_team_3", "games"]
+# Full feature set: advanced + regular + wins + rank.
+FULL_FEATURE_COLUMNS = ADVANCED_STAT_COLUMNS + REGULAR_AND_WINS_COLUMNS
 
 
 def build_historical_dataset(
@@ -253,11 +451,18 @@ def build_advanced_historical_dataset(
     min_games: int = 41,
 ) -> pd.DataFrame:
     """
-    Build historical dataset using only Basketball Reference advanced stats.
-    One row per player-season; columns include PER, WS, BPM, VORP, etc., plus is_mvp.
+    Build historical dataset: advanced stats + per-game (ppg, rpg, apg) + team_wins.
+    One row per player-season; combines regular stats, advanced stats, and wins for MVP prediction.
     """
     mvp_df = fetch_mvp_history()
+    _br_delay()
+    if mvp_df.empty or "season" not in mvp_df.columns:
+        raise RuntimeError(
+            "Could not fetch MVP history from Basketball Reference (rate limited, 403, or page changed). "
+            "Wait a few minutes and try again, or use cached data: keep data/historical_advanced.csv and re-run."
+        )
     seasons = get_season_list(start_year=start_year, end_year=end_year)
+    mvp_df["season"] = mvp_df["season"].apply(_normalize_season)
     mvp_df = mvp_df[mvp_df["season"].isin(seasons)].copy()
     mvp_df["is_mvp"] = 1
 
@@ -266,27 +471,54 @@ def build_advanced_historical_dataset(
         df = fetch_advanced_stats_br(season)
         if df.empty:
             continue
-        # Minimum games
         if "games" in df.columns:
             df["games"] = pd.to_numeric(df["games"], errors="coerce")
             df = df[df["games"].fillna(0) >= min_games].copy()
-        # Keep one row per player (primary team if traded)
-        if "team_abbr" in df.columns and df["player"].duplicated().any():
+        if "team_abbr" in df.columns and "player" in df.columns and df["player"].duplicated().any():
             df = df.sort_values("mp", ascending=False).drop_duplicates(subset=["player", "season"], keep="first")
+
+        per_game = fetch_per_game_stats_br(season, min_games=min_games)
+        if not per_game.empty and "ppg" in per_game.columns:
+            pg = per_game[["player", "season", "ppg", "rpg", "apg"]].copy()
+            pg["_pclean"] = pg["player"].apply(_normalize_player_name)
+            df["_pclean"] = df["player"].apply(_normalize_player_name)
+            df = df.merge(pg[["season", "_pclean", "ppg", "rpg", "apg"]], on=["season", "_pclean"], how="left")
+            df = df.drop(columns=["_pclean"], errors="ignore")
+        time.sleep(0.3)
+
+        standings = fetch_standings_br(season)
+        if not standings.empty and "team_abbr" in df.columns:
+            df = df.merge(standings, on=["team_abbr", "season"], how="left")
+        time.sleep(0.3)
+
         all_dfs.append(df)
         time.sleep(0.6)
 
     player_df = pd.concat(all_dfs, ignore_index=True)
 
-    # Coerce advanced stats to numeric
+    # Team wins rank (1 = most wins in league that season). MVP voters strongly favor top-3 seeds.
+    if "team_wins" in player_df.columns:
+        rank_df = (
+            player_df[["season", "team_abbr", "team_wins"]]
+            .drop_duplicates()
+            .sort_values(["season", "team_wins"], ascending=[True, False])
+        )
+        rank_df["team_win_rank"] = rank_df.groupby("season")["team_wins"].rank(method="min", ascending=False).astype(int)
+        player_df = player_df.merge(rank_df[["season", "team_abbr", "team_win_rank"]], on=["season", "team_abbr"], how="left")
+        player_df["top_team_3"] = (player_df["team_win_rank"] <= 3).astype(int)
+
     for col in ADVANCED_STAT_COLUMNS:
         if col in player_df.columns:
             player_df[col] = pd.to_numeric(player_df[col], errors="coerce")
+    for col in REGULAR_AND_WINS_COLUMNS:
+        if col in player_df.columns:
+            player_df[col] = pd.to_numeric(player_df[col], errors="coerce")
 
-    # Label MVP
     mvp_merge = mvp_df[["season", "player", "is_mvp"]].drop_duplicates()
-    player_df["player_clean"] = player_df["player"].str.strip()
-    mvp_merge["player_clean"] = mvp_merge["player"].str.strip()
+    mvp_merge["player_clean"] = mvp_merge["player"].apply(_normalize_player_name)
+    mvp_merge["season"] = mvp_merge["season"].apply(_normalize_season)
+    player_df["player_clean"] = player_df["player"].apply(_normalize_player_name)
+    player_df["season"] = player_df["season"].astype(str).apply(_normalize_season)
     player_df = player_df.merge(
         mvp_merge[["season", "player_clean", "is_mvp"]],
         on=["season", "player_clean"],
@@ -297,7 +529,7 @@ def build_advanced_historical_dataset(
 
 
 def fetch_current_season_advanced(season: str = "2025-26", min_games: int = 20) -> pd.DataFrame:
-    """Fetch advanced stats for current season for MVP prediction."""
+    """Fetch advanced + per-game stats + team wins for current season (same formula as historical)."""
     df = fetch_advanced_stats_br(season)
     if df.empty:
         return df
@@ -306,7 +538,23 @@ def fetch_current_season_advanced(season: str = "2025-26", min_games: int = 20) 
         df = df[df["games"].fillna(0) >= min_games].copy()
     if "team_abbr" in df.columns and df["player"].duplicated().any():
         df = df.sort_values("mp", ascending=False).drop_duplicates(subset=["player", "season"], keep="first")
-    for col in ADVANCED_STAT_COLUMNS:
+    per_game = fetch_per_game_stats_br(season, min_games=min_games)
+    if not per_game.empty and "ppg" in per_game.columns:
+        pg = per_game[["player", "season", "ppg", "rpg", "apg"]].copy()
+        pg["_pclean"] = pg["player"].apply(_normalize_player_name)
+        df["_pclean"] = df["player"].apply(_normalize_player_name)
+        df = df.merge(pg[["season", "_pclean", "ppg", "rpg", "apg"]], on=["season", "_pclean"], how="left")
+        df = df.drop(columns=["_pclean"], errors="ignore")
+    standings = fetch_standings_br(season)
+    if not standings.empty and "team_abbr" in df.columns:
+        df = df.merge(standings, on=["team_abbr", "season"], how="left")
+        # Team wins rank and top-3 flag (MVP almost always from top-3 team)
+        if "team_wins" in df.columns:
+            rank_df = df[["season", "team_abbr", "team_wins"]].drop_duplicates().sort_values("team_wins", ascending=False)
+            rank_df["team_win_rank"] = rank_df["team_wins"].rank(method="min", ascending=False).astype(int)
+            df = df.merge(rank_df[["season", "team_abbr", "team_win_rank"]], on=["season", "team_abbr"], how="left")
+            df["top_team_3"] = (df["team_win_rank"] <= 3).astype(int)
+    for col in ADVANCED_STAT_COLUMNS + REGULAR_AND_WINS_COLUMNS:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
     return df

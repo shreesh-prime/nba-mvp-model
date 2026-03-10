@@ -7,7 +7,7 @@ import json
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, confusion_matrix
@@ -17,6 +17,8 @@ from data.fetch_data import (
     build_advanced_historical_dataset,
     fetch_current_season_advanced,
     ADVANCED_STAT_COLUMNS,
+    FULL_FEATURE_COLUMNS,
+    REGULAR_AND_WINS_COLUMNS,
 )
 
 # Paths
@@ -24,6 +26,7 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 CACHE_PATH = os.path.join(DATA_DIR, "historical_advanced.csv")
 FEATURE_RANK_PATH = os.path.join(DATA_DIR, "mvp_feature_correlations.json")
 BACKTEST_REPORT_PATH = os.path.join(DATA_DIR, "backtest_results.csv")
+BACKTEST_DETAILS_PATH = os.path.join(DATA_DIR, "backtest_season_details.json")
 FORMULA_PATH = os.path.join(DATA_DIR, "mvp_formula.txt")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -37,7 +40,29 @@ def get_historical_data(use_cache: bool = True, start_year: int = 2000, end_year
         print(f"Loaded cached data: {len(df)} rows from {CACHE_PATH}")
         return df
     print("Building historical dataset from Basketball Reference (this may take a few minutes)...")
-    df = build_advanced_historical_dataset(start_year=start_year, end_year=end_year)
+    try:
+        df = build_advanced_historical_dataset(start_year=start_year, end_year=end_year)
+    except (OSError, Exception) as e:
+        err_msg = str(e).lower()
+        use_cache_on_error = (
+            "nodename nor servname" in err_msg or "gaierror" in err_msg or "urlopen" in err_msg
+            or "certificate" in err_msg or "could not fetch mvp" in err_msg or "rate limited" in err_msg
+        )
+        if use_cache_on_error and use_cache and os.path.isfile(CACHE_PATH):
+            print("Fetch failed (network/rate limit). Using cached data.")
+            return pd.read_csv(CACHE_PATH)
+        if "could not fetch mvp" in err_msg or "rate limited" in err_msg:
+            raise RuntimeError(
+                "Could not fetch MVP history from Basketball Reference (often 429 rate limit).\n"
+                "  - Wait 5–10 minutes and run again, or keep data/historical_advanced.csv to use cache."
+            ) from e
+        if use_cache_on_error:
+            raise RuntimeError(
+                "Could not reach Basketball Reference (check internet and DNS).\n"
+                "  - Try opening https://www.basketball-reference.com in your browser.\n"
+                "  - If you have data/historical_advanced.csv from a previous run, the script will use it next time."
+            ) from e
+        raise
     df.to_csv(CACHE_PATH, index=False)
     print(f"Saved to {CACHE_PATH}")
     return df
@@ -45,13 +70,20 @@ def get_historical_data(use_cache: bool = True, start_year: int = 2000, end_year
 
 def compute_correlations(df: pd.DataFrame) -> pd.Series:
     """
-    Compute correlation of each advanced stat with is_mvp.
-    Returns series of (stat -> correlation with is_mvp), sorted by absolute value.
+    Compute correlation of each feature with is_mvp.
+    Uses full feature set: advanced + ppg, rpg, apg, team_wins (points and wins emphasized).
     """
-    feature_cols = [c for c in ADVANCED_STAT_COLUMNS if c in df.columns]
-    df_clean = df[feature_cols + ["is_mvp"]].dropna(how="all", subset=feature_cols)
-    correlations = df_clean[feature_cols].corrwith(df_clean["is_mvp"]).abs().sort_values(ascending=False)
-    return correlations
+    candidate_cols = [c for c in FULL_FEATURE_COLUMNS if c in df.columns]
+    if not candidate_cols:
+        candidate_cols = [c for c in ADVANCED_STAT_COLUMNS if c in df.columns]
+    df_clean = df[candidate_cols + ["is_mvp"]].dropna(how="all", subset=candidate_cols)
+    correlations = df_clean[candidate_cols].corrwith(df_clean["is_mvp"]).abs().sort_values(ascending=False)
+    # Emphasize criteria that match MVP voting: team success (strongest), then points
+    for col in ("top_team_3", "team_win_rank", "team_wins", "ppg"):
+        if col in correlations.index and not pd.isna(correlations[col]):
+            boost = 1.6 if col in ("top_team_3", "team_win_rank") else 1.4
+            correlations[col] = min(1.0, correlations[col] * boost)
+    return correlations.sort_values(ascending=False)
 
 
 def analyze_and_save_correlations(df: pd.DataFrame, plot: bool = True) -> pd.Series:
@@ -80,9 +112,13 @@ def analyze_and_save_correlations(df: pd.DataFrame, plot: bool = True) -> pd.Ser
     return correlations
 
 
-def get_top_features(correlations: pd.Series, top_k: int = 10) -> list:
-    """Return list of top-k feature names by correlation with is_mvp."""
-    return correlations.head(top_k).index.tolist()
+def get_top_features(correlations: pd.Series, top_k: int = 12) -> list:
+    """Top-k features; prioritize team success (top_team_3, team_win_rank) and ppg in the score, plus impactful advanced stats."""
+    top = correlations.head(top_k).index.tolist()
+    for must in ("top_team_3", "team_win_rank", "team_wins", "ppg"):
+        if must in correlations.index and must not in top:
+            top = [must] + [f for f in top if f != must][: top_k - 1]
+    return top[:top_k]
 
 
 def prepare_xy(df: pd.DataFrame, feature_cols: list):
@@ -102,7 +138,9 @@ def train_model(
     random_state: int = 42,
 ):
     """
-    Train RandomForest to predict is_mvp. Returns fitted model, scaler, and feature list.
+    Train Ridge regression (primary) and Random Forest on correlated features.
+    Ridge ranks by predicted MVP score (linear combo of key factors).
+    Returns (ridge, scaler, feature_cols) for production.
     """
     X, y, df_xy = prepare_xy(df, feature_cols)
     if y.sum() < 2:
@@ -111,28 +149,36 @@ def train_model(
     scaler = StandardScaler()
     X_train_s = scaler.fit_transform(X_train)
     X_test_s = scaler.transform(X_test)
+
+    ridge = Ridge(alpha=1.0, random_state=random_state)
+    ridge.fit(X_train_s, y_train)
+    y_score = ridge.predict(X_test_s)
+    y_pred_ridge = (y_score >= np.percentile(y_score, 100 * (1 - 1 / len(y_score)))) if len(y_score) else np.array([])
+    print("\n--- Ridge regression (MVP score) — test set ---")
+    if len(y_pred_ridge):
+        print(classification_report(y_test, y_pred_ridge, zero_division=0))
+
     clf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=random_state, class_weight="balanced")
     clf.fit(X_train_s, y_train)
     y_pred = clf.predict(X_test_s)
-    print("\n--- Model performance (test set) ---")
+    print("\n--- Random Forest (reference) — test set ---")
     print(classification_report(y_test, y_pred, zero_division=0))
     print("Confusion matrix:\n", confusion_matrix(y_test, y_pred))
-    # Feature importance (from tree model)
     imp = pd.Series(clf.feature_importances_, index=feature_cols).sort_values(ascending=False)
-    print("\n--- Feature importance (from Random Forest) ---")
+    print("\n--- Feature importance (Random Forest) ---")
     print(imp.to_string())
-    return clf, scaler, feature_cols
+    return ridge, scaler, feature_cols
 
 
 def backtest_historical(
     df: pd.DataFrame,
     feature_cols: list,
     min_seasons: int = 5,
+    top_n: int = 10,
 ) -> pd.DataFrame:
     """
-    Leave-one-season-out backtest: for each season, train on all other seasons,
-    predict that season's MVP (top-1 by probability), compare to actual winner.
-    Returns DataFrame with season, actual_mvp, predicted_mvp, correct.
+    Leave-one-season-out backtest using Ridge (linear combo of key factors).
+    Saves backtest_results.csv and backtest_season_details.json with top_n per season.
     """
     seasons = df["season"].dropna().unique().tolist()
     seasons = sorted([s for s in seasons if str(s).strip() != ""])
@@ -140,59 +186,62 @@ def backtest_historical(
         raise ValueError(f"Need at least {min_seasons} seasons, got {len(seasons)}")
 
     results = []
+    details_by_season = {}
+
     for test_season in seasons:
         train_df = df[df["season"] != test_season].copy()
         test_df = df[df["season"] == test_season].copy()
         X_train, y_train, train_xy = prepare_xy(train_df, feature_cols)
         X_test, y_test, test_xy = prepare_xy(test_df, feature_cols)
         if X_train.empty or X_test.empty or y_train.sum() < 1:
-            results.append({
-                "season": test_season,
-                "actual_mvp": _get_actual_mvp(df, test_season),
-                "predicted_mvp": None,
-                "correct": False,
-                "note": "insufficient data",
-            })
+            actual_mvp = _get_actual_mvp(df, test_season)
+            results.append({"season": test_season, "actual_mvp": actual_mvp, "predicted_mvp": None, "correct": False, "note": "insufficient data"})
+            details_by_season[str(test_season)] = {"actual_mvp": actual_mvp, "predicted_mvp": None, "correct": False, "top10": []}
             continue
         if y_test.sum() < 1:
-            results.append({
-                "season": test_season,
-                "actual_mvp": _get_actual_mvp(df, test_season),
-                "predicted_mvp": None,
-                "correct": False,
-                "note": "no MVP in test set",
-            })
+            actual_mvp = _get_actual_mvp(df, test_season)
+            results.append({"season": test_season, "actual_mvp": actual_mvp, "predicted_mvp": None, "correct": False, "note": "no MVP in test set"})
+            details_by_season[str(test_season)] = {"actual_mvp": actual_mvp, "predicted_mvp": None, "correct": False, "top10": []}
             continue
+
         scaler = StandardScaler()
         X_train_s = scaler.fit_transform(X_train)
         X_test_s = scaler.transform(X_test)
-        clf = RandomForestClassifier(
-            n_estimators=200, max_depth=6, random_state=42, class_weight="balanced"
-        )
-        clf.fit(X_train_s, y_train)
-        proba = clf.predict_proba(X_test_s)[:, 1]
+        ridge = Ridge(alpha=1.0, random_state=42)
+        ridge.fit(X_train_s, y_train)
+        scores = ridge.predict(X_test_s)
         test_xy = test_xy.copy()
-        test_xy["_mvp_prob"] = proba
-        predicted_row = test_xy.loc[test_xy["_mvp_prob"].idxmax()]
+        test_xy["_mvp_score"] = scores
+        # Rank all players by MVP score (team success is in the formula but not required; standout stats can win)
+        candidates = test_xy.sort_values("_mvp_score", ascending=False).reset_index(drop=True)
+        top_n_df = candidates.head(top_n)
+        predicted_row = top_n_df.iloc[0]
         predicted_mvp = predicted_row["player"] if "player" in predicted_row else predicted_row.get("player_clean", "?")
         actual_mvp = _get_actual_mvp(df, test_season)
         correct = _names_match(actual_mvp, str(predicted_mvp))
-        results.append({
-            "season": test_season,
-            "actual_mvp": actual_mvp,
-            "predicted_mvp": predicted_mvp,
-            "correct": correct,
-            "note": "",
-        })
+
+        top10_list = []
+        for i, (_, row) in enumerate(top_n_df.iterrows(), 1):
+            top10_list.append({
+                "rank": i,
+                "player": str(row.get("player", row.get("player_clean", "?"))),
+                "team": str(row.get("team_abbr", "")),
+                "score": float(row["_mvp_score"]),
+            })
+
+        results.append({"season": test_season, "actual_mvp": actual_mvp, "predicted_mvp": predicted_mvp, "correct": correct, "note": ""})
+        details_by_season[str(test_season)] = {"actual_mvp": actual_mvp, "predicted_mvp": predicted_mvp, "correct": correct, "top10": top10_list}
 
     report = pd.DataFrame(results)
     report.to_csv(BACKTEST_REPORT_PATH, index=False)
+    with open(BACKTEST_DETAILS_PATH, "w") as f:
+        json.dump(details_by_season, f, indent=2)
     n = report["correct"].sum()
     total = len(report[report["predicted_mvp"].notna()])
     if total:
-        print(f"\n--- Backtest (leave-one-season-out): {n}/{total} seasons correct ({100 * n / total:.1f}%) ---")
+        print(f"\n--- Backtest (Ridge, leave-one-season-out): {n}/{total} seasons correct ({100 * n / total:.1f}%) ---")
         print(report.to_string(index=False))
-        print(f"\nSaved to {BACKTEST_REPORT_PATH}")
+        print(f"\nSaved to {BACKTEST_REPORT_PATH} and {BACKTEST_DETAILS_PATH}")
     return report
 
 
@@ -265,7 +314,7 @@ def get_mvp_formula(
 
 
 def predict_current_season(
-    clf,
+    model,
     scaler,
     feature_cols: list,
     season: str = "2025-26",
@@ -273,7 +322,8 @@ def predict_current_season(
     top_n: int = 10,
 ) -> pd.DataFrame:
     """
-    Fetch current season advanced stats, score with model, return top_n candidates.
+    Fetch current season advanced stats, score with Ridge model (linear combo of key factors),
+    return top_n candidates ranked by MVP score.
     """
     current = fetch_current_season_advanced(season=season, min_games=min_games)
     if current.empty:
@@ -281,18 +331,19 @@ def predict_current_season(
     missing = [c for c in feature_cols if c not in current.columns]
     if missing:
         raise ValueError(f"Current season data missing columns: {missing}")
-    X = current[feature_cols].fillna(0)  # fill rare missing with 0
+    X = current[feature_cols].fillna(0)
     X_s = scaler.transform(X)
-    current["mvp_prob"] = clf.predict_proba(X_s)[:, 1]
-    current["mvp_rank"] = current["mvp_prob"].rank(ascending=False).astype(int)
-    top = current.nsmallest(top_n, "mvp_rank")[["player", "team_abbr", "mvp_rank", "mvp_prob"] + feature_cols]
+    current["mvp_score"] = model.predict(X_s)
+    # Rank all players by MVP score (top-3 team helps in the formula but not required)
+    current["mvp_rank"] = current["mvp_score"].rank(ascending=False).astype(int)
+    top = current.nsmallest(top_n, "mvp_rank")[["player", "team_abbr", "mvp_rank", "mvp_score"] + [c for c in feature_cols if c in current.columns]]
     return top
 
 
 def run_full_pipeline(
     start_year: int = 2000,
     end_year: int = 2025,
-    top_k_features: int = 10,
+    top_k_features: int = 12,
     current_season: str = "2025-26",
     use_cache: bool = True,
     run_backtest: bool = True,
@@ -321,22 +372,28 @@ def run_full_pipeline(
                 print(">>> Tip: See 'Ideas to improve accuracy' in README or run: python mvp_model.py backtest")
 
     clf, scaler, feature_cols = train_model(df, feature_cols)
-    top = predict_current_season(clf, scaler, feature_cols, season=current_season, top_n=10)
-    print(f"\n--- Top 10 MVP candidates for {current_season} (by model) ---")
-    print(top.to_string(index=False))
-    # Save model, scaler, and feature list for reuse
-    joblib.dump(clf, os.path.join(MODEL_DIR, "mvp_classifier.joblib"))
+    joblib.dump(clf, os.path.join(MODEL_DIR, "ridge_model.joblib"))
     joblib.dump(scaler, os.path.join(MODEL_DIR, "scaler.joblib"))
     with open(os.path.join(MODEL_DIR, "feature_cols.json"), "w") as f:
         json.dump(feature_cols, f)
-    print(f"\nModel and scaler saved to {MODEL_DIR}")
+    print(f"\nRidge model and scaler saved to {MODEL_DIR}")
+
+    top = None
+    try:
+        top = predict_current_season(clf, scaler, feature_cols, season=current_season, top_n=10)
+        print(f"\n--- Top 10 MVP candidates for {current_season} (by model) ---")
+        print(top.to_string(index=False))
+    except (FileNotFoundError, ValueError) as e:
+        print(f"\n--- Could not fetch {current_season} data: {e}")
+        print(">>> Model is saved. Run 'python3 update_data.py' later to fetch current stats and generate 2025-26 prediction.")
+
     return df, correlations, clf, scaler, top
 
 
 def run_backtest_and_formula(
     start_year: int = 2000,
     end_year: int = 2025,
-    top_k_features: int = 10,
+    top_k_features: int = 12,
     use_cache: bool = True,
 ) -> tuple:
     """
@@ -387,7 +444,7 @@ if __name__ == "__main__":
         run_backtest_and_formula(
             start_year=2000,
             end_year=2025,
-            top_k_features=10,
+            top_k_features=12,
             use_cache=True,
         )
     else:

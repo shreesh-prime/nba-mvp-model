@@ -10,3 +10,4 @@ nba_api>=1.4.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 jupyter>=1.0.0
+certifi>=2023.0.0

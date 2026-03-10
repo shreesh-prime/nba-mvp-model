@@ -22,7 +22,7 @@ OUTPUT_PATH = os.path.join(DATA_DIR, "current_season_prediction.json")
 def main():
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    model_path = os.path.join(MODEL_DIR, "mvp_classifier.joblib")
+    model_path = os.path.join(MODEL_DIR, "ridge_model.joblib")
     scaler_path = os.path.join(MODEL_DIR, "scaler.joblib")
     features_path = os.path.join(MODEL_DIR, "feature_cols.json")
 
@@ -38,7 +38,7 @@ def main():
         print("No data for 2025-26. Check Basketball Reference or try again later.")
         return
 
-    clf = joblib.load(model_path)
+    model = joblib.load(model_path)
     scaler = joblib.load(scaler_path)
     with open(features_path) as f:
         feature_cols = json.load(f)
@@ -51,8 +51,8 @@ def main():
     X = current[feature_cols].fillna(0)
     X_s = scaler.transform(X)
     current = current.copy()
-    current["mvp_prob"] = clf.predict_proba(X_s)[:, 1]
-    current["mvp_rank"] = current["mvp_prob"].rank(ascending=False).astype(int)
+    current["mvp_score"] = model.predict(X_s)
+    current["mvp_rank"] = current["mvp_score"].rank(ascending=False).astype(int)
     top10_df = current.nsmallest(10, "mvp_rank")
 
     top10 = []
@@ -61,7 +61,7 @@ def main():
             "rank": int(row["mvp_rank"]),
             "player": str(row.get("player", "")),
             "team": str(row.get("team_abbr", "")),
-            "prob": float(row["mvp_prob"]),
+            "score": float(row["mvp_score"]),
         })
 
     top1 = top10[0] if top10 else {}

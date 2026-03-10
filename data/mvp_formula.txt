@@ -1,0 +1,6 @@
+MVP formula (logistic regression, after standardizing features):
+  P(MVP) = 1 / (1 + exp(-z))
+  z = -15.8803 -0.6953*vorp +1.1143*ws +0.8075*ows +2.4693*ppg -0.2500*bpm -0.7408*per +2.0010*ws_per_48 +0.3842*obpm +1.1069*dws +2.0458*apg
+
+Higher z => higher MVP probability. Coefficients (in z) show how much each standardized stat pushes toward MVP (positive = helps, negative = hurts).
+Features are standardized (mean=0, std=1) before plugging in.

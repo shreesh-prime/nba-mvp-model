@@ -1,0 +1,11 @@
+season,actual_mvp,predicted_mvp,correct,note
+2000-01,Allen Iverson,Shaquille O'Neal,False,
+2001-02,Tim Duncan,Tim Duncan,True,
+2002-03,Tim Duncan,Kevin Garnett,False,
+2003-04,Kevin Garnett,Kevin Garnett,True,
+2004-05,Steve Nash,LeBron James,False,
+2005-06,Steve Nash,LeBron James,False,
+2006-07,Dirk Nowitzki,LeBron James,False,
+2007-08,Kobe Bryant,Chris Paul,False,
+2008-09,LeBron James,LeBron James,True,
+2009-10,LeBron James,LeBron James,True,

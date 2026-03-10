@@ -1,0 +1,672 @@
+{
+  "2000-01": {
+    "actual_mvp": "Allen Iverson",
+    "predicted_mvp": "Shaquille O'Neal",
+    "correct": false,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.06703791193810682
+      },
+      {
+        "rank": 2,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.06558018496438543
+      },
+      {
+        "rank": 3,
+        "player": "Vince Carter",
+        "team": "TOR",
+        "score": 0.06555302611575499
+      },
+      {
+        "rank": 4,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.06538995975166349
+      },
+      {
+        "rank": 5,
+        "player": "Steve Francis",
+        "team": "HOU",
+        "score": 0.0620428616364805
+      },
+      {
+        "rank": 6,
+        "player": "Ray Allen",
+        "team": "MIL",
+        "score": 0.06142565746243828
+      },
+      {
+        "rank": 7,
+        "player": "Karl Malone",
+        "team": "UTA",
+        "score": 0.05965649047831245
+      },
+      {
+        "rank": 8,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.05851336480547331
+      },
+      {
+        "rank": 9,
+        "player": "John Stockton",
+        "team": "UTA",
+        "score": 0.057963976136018204
+      },
+      {
+        "rank": 10,
+        "player": "Gary Payton",
+        "team": "SEA",
+        "score": 0.049728879558003584
+      }
+    ]
+  },
+  "2001-02": {
+    "actual_mvp": "Tim Duncan",
+    "predicted_mvp": "Tim Duncan",
+    "correct": true,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.07762278351629776
+      },
+      {
+        "rank": 2,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.07160396022275115
+      },
+      {
+        "rank": 3,
+        "player": "Gary Payton",
+        "team": "SEA",
+        "score": 0.06297098325804402
+      },
+      {
+        "rank": 4,
+        "player": "Brent Barry",
+        "team": "SEA",
+        "score": 0.05976367565048578
+      },
+      {
+        "rank": 5,
+        "player": "Paul Pierce",
+        "team": "BOS",
+        "score": 0.057598925145002214
+      },
+      {
+        "rank": 6,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.05615419463480926
+      },
+      {
+        "rank": 7,
+        "player": "Andre Miller",
+        "team": "CLE",
+        "score": 0.051723474521278755
+      },
+      {
+        "rank": 8,
+        "player": "Jason Kidd",
+        "team": "NJN",
+        "score": 0.05000654479979285
+      },
+      {
+        "rank": 9,
+        "player": "John Stockton",
+        "team": "UTA",
+        "score": 0.04947725628003062
+      },
+      {
+        "rank": 10,
+        "player": "Baron Davis",
+        "team": "CHH",
+        "score": 0.04726061545582796
+      }
+    ]
+  },
+  "2002-03": {
+    "actual_mvp": "Tim Duncan",
+    "predicted_mvp": "Kevin Garnett",
+    "correct": false,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.09433278989663667
+      },
+      {
+        "rank": 2,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.09180117027230385
+      },
+      {
+        "rank": 3,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.07774487556052252
+      },
+      {
+        "rank": 4,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.07639832221220196
+      },
+      {
+        "rank": 5,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.07019151954822986
+      },
+      {
+        "rank": 6,
+        "player": "Jason Kidd",
+        "team": "NJN",
+        "score": 0.06374473732984459
+      },
+      {
+        "rank": 7,
+        "player": "Shawn Marion",
+        "team": "PHO",
+        "score": 0.06252924558137275
+      },
+      {
+        "rank": 8,
+        "player": "Steve Francis",
+        "team": "HOU",
+        "score": 0.044920111138571556
+      },
+      {
+        "rank": 9,
+        "player": "Paul Pierce",
+        "team": "BOS",
+        "score": 0.04386120434256943
+      },
+      {
+        "rank": 10,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.04356966587517287
+      }
+    ]
+  },
+  "2003-04": {
+    "actual_mvp": "Kevin Garnett",
+    "predicted_mvp": "Kevin Garnett",
+    "correct": true,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.09601186473475287
+      },
+      {
+        "rank": 2,
+        "player": "Andrei Kirilenko",
+        "team": "UTA",
+        "score": 0.0631295219830975
+      },
+      {
+        "rank": 3,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.046171253552327825
+      },
+      {
+        "rank": 4,
+        "player": "Peja Stojakovi\u0107",
+        "team": "SAC",
+        "score": 0.04269924863473181
+      },
+      {
+        "rank": 5,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.042521801198151216
+      },
+      {
+        "rank": 6,
+        "player": "Stephon Marbury",
+        "team": "2TM",
+        "score": 0.041598255537489956
+      },
+      {
+        "rank": 7,
+        "player": "Sam Cassell",
+        "team": "MIN",
+        "score": 0.04127466339091077
+      },
+      {
+        "rank": 8,
+        "player": "Shawn Marion",
+        "team": "PHO",
+        "score": 0.036995487926302556
+      },
+      {
+        "rank": 9,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.035037522717502996
+      },
+      {
+        "rank": 10,
+        "player": "Baron Davis",
+        "team": "NOH",
+        "score": 0.03169921454619015
+      }
+    ]
+  },
+  "2004-05": {
+    "actual_mvp": "Steve Nash",
+    "predicted_mvp": "LeBron James",
+    "correct": false,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.1058804900890596
+      },
+      {
+        "rank": 2,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.10569547678812097
+      },
+      {
+        "rank": 3,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.0730163814714481
+      },
+      {
+        "rank": 4,
+        "player": "Tracy McGrady",
+        "team": "HOU",
+        "score": 0.07145795755583717
+      },
+      {
+        "rank": 5,
+        "player": "Vince Carter",
+        "team": "2TM",
+        "score": 0.05294855310711879
+      },
+      {
+        "rank": 6,
+        "player": "Shawn Marion",
+        "team": "PHO",
+        "score": 0.05233392493664859
+      },
+      {
+        "rank": 7,
+        "player": "Gilbert Arenas",
+        "team": "WAS",
+        "score": 0.04839949261526117
+      },
+      {
+        "rank": 8,
+        "player": "Stephon Marbury",
+        "team": "NYK",
+        "score": 0.0466522390919015
+      },
+      {
+        "rank": 9,
+        "player": "Paul Pierce",
+        "team": "BOS",
+        "score": 0.04327747016417612
+      },
+      {
+        "rank": 10,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.04302706090279804
+      }
+    ]
+  },
+  "2005-06": {
+    "actual_mvp": "Steve Nash",
+    "predicted_mvp": "LeBron James",
+    "correct": false,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.10979158676707579
+      },
+      {
+        "rank": 2,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.08606492393716365
+      },
+      {
+        "rank": 3,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.0858760752946116
+      },
+      {
+        "rank": 4,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.08181373195748487
+      },
+      {
+        "rank": 5,
+        "player": "Elton Brand",
+        "team": "LAC",
+        "score": 0.07381208214083125
+      },
+      {
+        "rank": 6,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.07097053595222631
+      },
+      {
+        "rank": 7,
+        "player": "Pau Gasol",
+        "team": "MEM",
+        "score": 0.0649395943853827
+      },
+      {
+        "rank": 8,
+        "player": "Gilbert Arenas",
+        "team": "WAS",
+        "score": 0.06413008723995796
+      },
+      {
+        "rank": 9,
+        "player": "Shawn Marion",
+        "team": "PHO",
+        "score": 0.059854973476770906
+      },
+      {
+        "rank": 10,
+        "player": "Chauncey Billups",
+        "team": "DET",
+        "score": 0.05910018201903901
+      }
+    ]
+  },
+  "2006-07": {
+    "actual_mvp": "Dirk Nowitzki",
+    "predicted_mvp": "LeBron James",
+    "correct": false,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.07864388123718855
+      },
+      {
+        "rank": 2,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.06605495444445267
+      },
+      {
+        "rank": 3,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.05522886872301494
+      },
+      {
+        "rank": 4,
+        "player": "Jason Kidd",
+        "team": "NJN",
+        "score": 0.05268516072493992
+      },
+      {
+        "rank": 5,
+        "player": "Steve Nash",
+        "team": "PHO",
+        "score": 0.052558277791018154
+      },
+      {
+        "rank": 6,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.049731899581217986
+      },
+      {
+        "rank": 7,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.04914760425458743
+      },
+      {
+        "rank": 8,
+        "player": "Elton Brand",
+        "team": "LAC",
+        "score": 0.041833818411300655
+      },
+      {
+        "rank": 9,
+        "player": "Shawn Marion",
+        "team": "PHO",
+        "score": 0.039966469531926896
+      },
+      {
+        "rank": 10,
+        "player": "Gilbert Arenas",
+        "team": "WAS",
+        "score": 0.038889083991605275
+      }
+    ]
+  },
+  "2007-08": {
+    "actual_mvp": "Kobe Bryant",
+    "predicted_mvp": "Chris Paul",
+    "correct": false,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Chris Paul",
+        "team": "NOH",
+        "score": 0.10712132415519886
+      },
+      {
+        "rank": 2,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.0988779356777499
+      },
+      {
+        "rank": 3,
+        "player": "Chauncey Billups",
+        "team": "DET",
+        "score": 0.058332343686259454
+      },
+      {
+        "rank": 4,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.056162817670974176
+      },
+      {
+        "rank": 5,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.05083308470421306
+      },
+      {
+        "rank": 6,
+        "player": "Kevin Garnett",
+        "team": "BOS",
+        "score": 0.04735938997385883
+      },
+      {
+        "rank": 7,
+        "player": "Deron Williams",
+        "team": "UTA",
+        "score": 0.04689782827621801
+      },
+      {
+        "rank": 8,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.04562947007034115
+      },
+      {
+        "rank": 9,
+        "player": "Steve Nash",
+        "team": "PHO",
+        "score": 0.04427865978886066
+      },
+      {
+        "rank": 10,
+        "player": "Andre Iguodala",
+        "team": "PHI",
+        "score": 0.04398218095510301
+      }
+    ]
+  },
+  "2008-09": {
+    "actual_mvp": "LeBron James",
+    "predicted_mvp": "LeBron James",
+    "correct": true,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.11435696151283765
+      },
+      {
+        "rank": 2,
+        "player": "Chris Paul",
+        "team": "NOH",
+        "score": 0.10263341787260805
+      },
+      {
+        "rank": 3,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.08719992717129918
+      },
+      {
+        "rank": 4,
+        "player": "Brandon Roy",
+        "team": "POR",
+        "score": 0.051851269007773405
+      },
+      {
+        "rank": 5,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.04610504232227209
+      },
+      {
+        "rank": 6,
+        "player": "Pau Gasol",
+        "team": "LAL",
+        "score": 0.044605215952128276
+      },
+      {
+        "rank": 7,
+        "player": "Jason Kidd",
+        "team": "DAL",
+        "score": 0.03914456947708333
+      },
+      {
+        "rank": 8,
+        "player": "Dwight Howard",
+        "team": "ORL",
+        "score": 0.03712656363365839
+      },
+      {
+        "rank": 9,
+        "player": "Andre Iguodala",
+        "team": "PHI",
+        "score": 0.035705240919034355
+      },
+      {
+        "rank": 10,
+        "player": "Rajon Rondo",
+        "team": "BOS",
+        "score": 0.03540074457334462
+      }
+    ]
+  },
+  "2009-10": {
+    "actual_mvp": "LeBron James",
+    "predicted_mvp": "LeBron James",
+    "correct": true,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.09604451236451664
+      },
+      {
+        "rank": 2,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.06598324984480732
+      },
+      {
+        "rank": 3,
+        "player": "Kevin Durant",
+        "team": "OKC",
+        "score": 0.06561644010075009
+      },
+      {
+        "rank": 4,
+        "player": "Josh Smith",
+        "team": "ATL",
+        "score": 0.04387242494222704
+      },
+      {
+        "rank": 5,
+        "player": "Jason Kidd",
+        "team": "DAL",
+        "score": 0.04383251503340432
+      },
+      {
+        "rank": 6,
+        "player": "Rajon Rondo",
+        "team": "BOS",
+        "score": 0.039987733084960925
+      },
+      {
+        "rank": 7,
+        "player": "Dwight Howard",
+        "team": "ORL",
+        "score": 0.03893273103516391
+      },
+      {
+        "rank": 8,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.037787687058914166
+      },
+      {
+        "rank": 9,
+        "player": "Steve Nash",
+        "team": "PHO",
+        "score": 0.0371872955644546
+      },
+      {
+        "rank": 10,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.034126858228229084
+      }
+    ]
+  }
+}
