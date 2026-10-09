@@ -7,7 +7,7 @@ import json
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression, Ridge
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, confusion_matrix
@@ -24,20 +24,30 @@ from data.fetch_data import (
 # Paths
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 CACHE_PATH = os.path.join(DATA_DIR, "historical_advanced.csv")
+# Cache is parameterized by the training window so different year ranges don't get mixed up.
+# (Kept compatible with older cached filenames by falling back if the parameterized cache doesn't exist.)
+CACHE_PATH_TEMPLATE = os.path.join(DATA_DIR, "historical_advanced_{start_year}_{end_year}.csv")
 FEATURE_RANK_PATH = os.path.join(DATA_DIR, "mvp_feature_correlations.json")
 BACKTEST_REPORT_PATH = os.path.join(DATA_DIR, "backtest_results.csv")
 BACKTEST_DETAILS_PATH = os.path.join(DATA_DIR, "backtest_season_details.json")
 FORMULA_PATH = os.path.join(DATA_DIR, "mvp_formula.txt")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
+MODEL_METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 
 def get_historical_data(use_cache: bool = True, start_year: int = 2000, end_year: int = 2025) -> pd.DataFrame:
     """Load or build historical player-season data with advanced stats and is_mvp."""
+    cache_path = CACHE_PATH_TEMPLATE.format(start_year=start_year, end_year=end_year)
+    legacy_cache_path = CACHE_PATH
     if use_cache and os.path.isfile(CACHE_PATH):
-        df = pd.read_csv(CACHE_PATH)
-        print(f"Loaded cached data: {len(df)} rows from {CACHE_PATH}")
+        df = pd.read_csv(legacy_cache_path)
+        print(f"Loaded cached data: {len(df)} rows from {legacy_cache_path}")
+        return df
+    if use_cache and os.path.isfile(cache_path):
+        df = pd.read_csv(cache_path)
+        print(f"Loaded cached data: {len(df)} rows from {cache_path}")
         return df
     print("Building historical dataset from Basketball Reference (this may take a few minutes)...")
     try:
@@ -63,8 +73,8 @@ def get_historical_data(use_cache: bool = True, start_year: int = 2000, end_year
                 "  - If you have data/historical_advanced.csv from a previous run, the script will use it next time."
             ) from e
         raise
-    df.to_csv(CACHE_PATH, index=False)
-    print(f"Saved to {CACHE_PATH}")
+    df.to_csv(cache_path, index=False)
+    print(f"Saved to {cache_path}")
     return df
 
 
@@ -77,18 +87,44 @@ def compute_correlations(df: pd.DataFrame) -> pd.Series:
     if not candidate_cols:
         candidate_cols = [c for c in ADVANCED_STAT_COLUMNS if c in df.columns]
     df_clean = df[candidate_cols + ["is_mvp"]].dropna(how="all", subset=candidate_cols)
+    # Point-biserial correlation: corr(feature, binary is_mvp)
     correlations = df_clean[candidate_cols].corrwith(df_clean["is_mvp"]).abs().sort_values(ascending=False)
-    # Emphasize criteria that match MVP voting: team success (strongest), then points
-    for col in ("top_team_3", "team_win_rank", "team_wins", "ppg"):
-        if col in correlations.index and not pd.isna(correlations[col]):
-            boost = 1.6 if col in ("top_team_3", "team_win_rank") else 1.4
-            correlations[col] = min(1.0, correlations[col] * boost)
-    return correlations.sort_values(ascending=False)
+    return correlations
 
 
-def analyze_and_save_correlations(df: pd.DataFrame, plot: bool = True) -> pd.Series:
+def apply_within_season_ranks(df: pd.DataFrame, feature_cols: list[str]) -> pd.DataFrame:
+    """
+    Replace each numeric feature with its within-season percentile rank.
+
+    Rationale: MVP voters compare players against their peers each season, so
+    rank-normalizing features often reduces scale-era effects.
+    """
+    if "season" not in df.columns:
+        raise ValueError("DataFrame must include a 'season' column for within-season ranking.")
+
+    out = df.copy()
+    # Higher is generally better; exception: team_win_rank (1=best) so invert it.
+    for col in feature_cols:
+        if col not in out.columns:
+            continue
+        if col == "top_team_3":
+            # Keep the original binary indicator; it already encodes within-season rank.
+            continue
+        if col == "team_win_rank":
+            # Convert "smaller is better" into "larger is better".
+            out[col] = (-out[col]).groupby(out["season"]).rank(pct=True, ascending=False)
+        else:
+            out[col] = out.groupby("season")[col].rank(pct=True, ascending=False)
+    return out
+
+
+def analyze_and_save_correlations(df: pd.DataFrame, plot: bool = True, use_within_season_ranks: bool = False) -> pd.Series:
     """Compute correlations, save to JSON, print top stats, and optionally plot."""
-    correlations = compute_correlations(df)
+    if use_within_season_ranks:
+        # Compute correlations using within-season percentile ranks for candidate features.
+        correlations = compute_correlations(apply_within_season_ranks(df, FULL_FEATURE_COLUMNS))
+    else:
+        correlations = compute_correlations(df)
     with open(FEATURE_RANK_PATH, "w") as f:
         json.dump(correlations.round(4).to_dict(), f, indent=2)
     print("\n--- Correlation with MVP (higher = more predictive) ---")
@@ -138,9 +174,8 @@ def train_model(
     random_state: int = 42,
 ):
     """
-    Train Ridge regression (primary) and Random Forest on correlated features.
-    Ridge ranks by predicted MVP score (linear combo of key factors).
-    Returns (ridge, scaler, feature_cols) for production.
+    Train Logistic Regression (primary) and Random Forest (reference) on correlated features.
+    Returns (logistic_model, scaler, feature_cols) for production.
     """
     X, y, df_xy = prepare_xy(df, feature_cols)
     if y.sum() < 2:
@@ -150,24 +185,37 @@ def train_model(
     X_train_s = scaler.fit_transform(X_train)
     X_test_s = scaler.transform(X_test)
 
-    ridge = Ridge(alpha=1.0, random_state=random_state)
-    ridge.fit(X_train_s, y_train)
-    y_score = ridge.predict(X_test_s)
-    y_pred_ridge = (y_score >= np.percentile(y_score, 100 * (1 - 1 / len(y_score)))) if len(y_score) else np.array([])
-    print("\n--- Ridge regression (MVP score) — test set ---")
-    if len(y_pred_ridge):
-        print(classification_report(y_test, y_pred_ridge, zero_division=0))
+    lr = LogisticRegression(
+        max_iter=2000,
+        random_state=random_state,
+        class_weight="balanced",
+        C=0.8,
+        solver="lbfgs",
+    )
+    lr.fit(X_train_s, y_train)
 
-    clf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=random_state, class_weight="balanced")
-    clf.fit(X_train_s, y_train)
-    y_pred = clf.predict(X_test_s)
-    print("\n--- Random Forest (reference) — test set ---")
+    y_prob = lr.predict_proba(X_test_s)[:, 1]
+    y_pred = (y_prob >= 0.5).astype(int)  # threshold only for sanity checking
+    print("\n--- Logistic Regression — test set (threshold=0.5) ---")
     print(classification_report(y_test, y_pred, zero_division=0))
     print("Confusion matrix:\n", confusion_matrix(y_test, y_pred))
-    imp = pd.Series(clf.feature_importances_, index=feature_cols).sort_values(ascending=False)
+
+    rf = RandomForestClassifier(
+        n_estimators=200,
+        max_depth=6,
+        random_state=random_state,
+        class_weight="balanced",
+    )
+    rf.fit(X_train_s, y_train)
+    y_pred_rf = rf.predict(X_test_s)
+    print("\n--- Random Forest (reference) — test set ---")
+    print(classification_report(y_test, y_pred_rf, zero_division=0))
+    print("Confusion matrix:\n", confusion_matrix(y_test, y_pred_rf))
+    imp = pd.Series(rf.feature_importances_, index=feature_cols).sort_values(ascending=False)
     print("\n--- Feature importance (Random Forest) ---")
     print(imp.to_string())
-    return ridge, scaler, feature_cols
+
+    return lr, scaler, feature_cols
 
 
 def backtest_historical(
@@ -177,7 +225,7 @@ def backtest_historical(
     top_n: int = 10,
 ) -> pd.DataFrame:
     """
-    Leave-one-season-out backtest using Ridge (linear combo of key factors).
+    Leave-one-season-out backtest using Logistic Regression probabilities.
     Saves backtest_results.csv and backtest_season_details.json with top_n per season.
     """
     seasons = df["season"].dropna().unique().tolist()
@@ -207,9 +255,15 @@ def backtest_historical(
         scaler = StandardScaler()
         X_train_s = scaler.fit_transform(X_train)
         X_test_s = scaler.transform(X_test)
-        ridge = Ridge(alpha=1.0, random_state=42)
-        ridge.fit(X_train_s, y_train)
-        scores = ridge.predict(X_test_s)
+        lr = LogisticRegression(
+            max_iter=2000,
+            random_state=42,
+            class_weight="balanced",
+            C=0.8,
+            solver="lbfgs",
+        )
+        lr.fit(X_train_s, y_train)
+        scores = lr.predict_proba(X_test_s)[:, 1]
         test_xy = test_xy.copy()
         test_xy["_mvp_score"] = scores
         # Rank all players by MVP score (team success is in the formula but not required; standout stats can win)
@@ -239,7 +293,7 @@ def backtest_historical(
     n = report["correct"].sum()
     total = len(report[report["predicted_mvp"].notna()])
     if total:
-        print(f"\n--- Backtest (Ridge, leave-one-season-out): {n}/{total} seasons correct ({100 * n / total:.1f}%) ---")
+        print(f"\n--- Backtest (Logistic Regression, leave-one-season-out): {n}/{total} seasons correct ({100 * n / total:.1f}%) ---")
         print(report.to_string(index=False))
         print(f"\nSaved to {BACKTEST_REPORT_PATH} and {BACKTEST_DETAILS_PATH}")
     return report
@@ -283,10 +337,11 @@ def get_mvp_formula(
     scaler = StandardScaler()
     X_s = scaler.fit_transform(X)
     lr = LogisticRegression(
-        max_iter=1000,
+        max_iter=2000,
         random_state=42,
         class_weight="balanced",
-        C=0.5,
+        C=0.8,
+        solver="lbfgs",
     )
     lr.fit(X_s, y)
     # Build formula string: z = intercept + c1*feat1 + c2*feat2 + ...
@@ -320,10 +375,10 @@ def predict_current_season(
     season: str = "2025-26",
     min_games: int = 20,
     top_n: int = 10,
+    use_within_season_ranks: bool = False,
 ) -> pd.DataFrame:
     """
-    Fetch current season advanced stats, score with Ridge model (linear combo of key factors),
-    return top_n candidates ranked by MVP score.
+    Fetch current season advanced stats and score candidates by MVP probability.
     """
     current = fetch_current_season_advanced(season=season, min_games=min_games)
     if current.empty:
@@ -331,9 +386,18 @@ def predict_current_season(
     missing = [c for c in feature_cols if c not in current.columns]
     if missing:
         raise ValueError(f"Current season data missing columns: {missing}")
-    X = current[feature_cols].fillna(0)
+    if use_within_season_ranks:
+        current = apply_within_season_ranks(current, feature_cols)
+    mask = current[feature_cols].notna().all(axis=1)
+    current = current[mask].copy()
+    if current.empty:
+        raise ValueError("No players had complete feature values for prediction.")
+    X = current[feature_cols].astype(float)
     X_s = scaler.transform(X)
-    current["mvp_score"] = model.predict(X_s)
+    if hasattr(model, "predict_proba"):
+        current["mvp_score"] = model.predict_proba(X_s)[:, 1]
+    else:
+        current["mvp_score"] = model.predict(X_s)
     # Rank all players by MVP score (top-3 team helps in the formula but not required)
     current["mvp_rank"] = current["mvp_score"].rank(ascending=False).astype(int)
     top = current.nsmallest(top_n, "mvp_rank")[["player", "team_abbr", "mvp_rank", "mvp_score"] + [c for c in feature_cols if c in current.columns]]
@@ -341,12 +405,13 @@ def predict_current_season(
 
 
 def run_full_pipeline(
-    start_year: int = 2000,
+    start_year: int = 1995,
     end_year: int = 2025,
     top_k_features: int = 12,
     current_season: str = "2025-26",
     use_cache: bool = True,
     run_backtest: bool = True,
+    use_within_season_ranks: bool = True,
 ):
     """
     1) Load historical data
@@ -356,13 +421,18 @@ def run_full_pipeline(
     5) Predict current season and print top 10
     """
     df = get_historical_data(use_cache=use_cache, start_year=start_year, end_year=end_year)
-    correlations = analyze_and_save_correlations(df)
+    correlations = analyze_and_save_correlations(df, use_within_season_ranks=use_within_season_ranks)
     feature_cols = get_top_features(correlations, top_k=top_k_features)
     print(f"\nUsing top-{top_k_features} stats for model: {feature_cols}")
 
+    df_model = df
+    if use_within_season_ranks:
+        # Train/backtest using peer-relative percentile ranks.
+        df_model = apply_within_season_ranks(df, FULL_FEATURE_COLUMNS)
+
     if run_backtest:
-        backtest_historical(df, feature_cols)
-        get_mvp_formula(df, feature_cols, save_path=FORMULA_PATH)
+        backtest_historical(df_model, feature_cols)
+        get_mvp_formula(df_model, feature_cols, save_path=FORMULA_PATH)
         total = pd.read_csv(BACKTEST_REPORT_PATH)
         n_correct = total["correct"].sum()
         n_total = total["predicted_mvp"].notna().sum()
@@ -371,16 +441,25 @@ def run_full_pipeline(
             if n_correct / n_total < 0.6:
                 print(">>> Tip: See 'Ideas to improve accuracy' in README or run: python mvp_model.py backtest")
 
-    clf, scaler, feature_cols = train_model(df, feature_cols)
+    clf, scaler, feature_cols = train_model(df_model, feature_cols)
     joblib.dump(clf, os.path.join(MODEL_DIR, "ridge_model.joblib"))
     joblib.dump(scaler, os.path.join(MODEL_DIR, "scaler.joblib"))
     with open(os.path.join(MODEL_DIR, "feature_cols.json"), "w") as f:
         json.dump(feature_cols, f)
-    print(f"\nRidge model and scaler saved to {MODEL_DIR}")
+    with open(MODEL_METADATA_PATH, "w") as f:
+        json.dump({"use_within_season_ranks": use_within_season_ranks}, f)
+    print(f"\nLogistic regression model and scaler saved to {MODEL_DIR}")
 
     top = None
     try:
-        top = predict_current_season(clf, scaler, feature_cols, season=current_season, top_n=10)
+        top = predict_current_season(
+            clf,
+            scaler,
+            feature_cols,
+            season=current_season,
+            top_n=10,
+            use_within_season_ranks=use_within_season_ranks,
+        )
         print(f"\n--- Top 10 MVP candidates for {current_season} (by model) ---")
         print(top.to_string(index=False))
     except (FileNotFoundError, ValueError) as e:
@@ -391,28 +470,34 @@ def run_full_pipeline(
 
 
 def run_backtest_and_formula(
-    start_year: int = 2000,
+    start_year: int = 1995,
     end_year: int = 2025,
     top_k_features: int = 12,
     use_cache: bool = True,
+    use_within_season_ranks: bool = True,
 ) -> tuple:
     """
     Run backtest (leave-one-season-out), print MVP formula from logistic regression,
     and print improvement suggestions if accuracy is low.
     """
     df = get_historical_data(use_cache=use_cache, start_year=start_year, end_year=end_year)
-    correlations = compute_correlations(df)
+    df_model = df
+    if use_within_season_ranks:
+        df_model = apply_within_season_ranks(df, FULL_FEATURE_COLUMNS)
+        correlations = compute_correlations(df_model)
+    else:
+        correlations = compute_correlations(df)
     feature_cols = get_top_features(correlations, top_k=top_k_features)
     print(f"Using top-{top_k_features} features for backtest: {feature_cols}")
 
     # Backtest
-    report = backtest_historical(df, feature_cols)
+    report = backtest_historical(df_model, feature_cols)
     total = report["predicted_mvp"].notna().sum()
     correct = report["correct"].sum()
     accuracy = (correct / total * 100) if total else 0
 
     # Formula (interpretable model)
-    get_mvp_formula(df, feature_cols, save_path=FORMULA_PATH)
+    get_mvp_formula(df_model, feature_cols, save_path=FORMULA_PATH)
 
     # Improvement suggestions
     suggestions = []
@@ -442,16 +527,16 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1].lower() == "backtest":
         run_backtest_and_formula(
-            start_year=2000,
+            start_year=1995,
             end_year=2025,
             top_k_features=12,
             use_cache=True,
         )
     else:
         run_full_pipeline(
-        start_year=2000,
+        start_year=1995,
         end_year=2025,
-        top_k_features=10,
+        top_k_features=12,
         current_season="2025-26",
         use_cache=True,
     )

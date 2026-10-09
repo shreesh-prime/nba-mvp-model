@@ -7,9 +7,11 @@ import json
 import joblib
 
 from data.fetch_data import fetch_current_season_advanced
+from mvp_model import apply_within_season_ranks
 
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
+MODEL_METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
 
 
 def load_model():
@@ -22,8 +24,15 @@ def load_model():
 
 
 def predict(season: str = "2025-26", min_games: int = 20, top_n: int = 10):
-    """Predict top MVP candidates for the given season (ranked by Ridge MVP score)."""
+    """Predict top MVP candidates for the given season (ranked by MVP probability)."""
     model, scaler, feature_cols = load_model()
+    use_within_season_ranks = False
+    if os.path.isfile(MODEL_METADATA_PATH):
+        try:
+            with open(MODEL_METADATA_PATH) as f:
+                use_within_season_ranks = json.load(f).get("use_within_season_ranks", False)
+        except Exception:
+            use_within_season_ranks = False
     current = fetch_current_season_advanced(season=season, min_games=min_games)
     if current.empty:
         print(f"No data for {season}. Try a different season or check Basketball Reference.")
@@ -32,9 +41,19 @@ def predict(season: str = "2025-26", min_games: int = 20, top_n: int = 10):
     if missing:
         print(f"Current data missing columns: {missing}. Re-run mvp_model.py to retrain.")
         return None
-    X = current[feature_cols].fillna(0)
+    if use_within_season_ranks:
+        current = apply_within_season_ranks(current, feature_cols)
+    mask = current[feature_cols].notna().all(axis=1)
+    current = current[mask].copy()
+    if current.empty:
+        print("No players had complete feature values for prediction.")
+        return None
+    X = current[feature_cols].astype(float)
     X_s = scaler.transform(X)
-    current["mvp_score"] = model.predict(X_s)
+    if hasattr(model, "predict_proba"):
+        current["mvp_score"] = model.predict_proba(X_s)[:, 1]
+    else:
+        current["mvp_score"] = model.predict(X_s)
     current["mvp_rank"] = current["mvp_score"].rank(ascending=False).astype(int)
     top = current.nsmallest(top_n, "mvp_rank")[
         ["player", "team_abbr", "mvp_rank", "mvp_score"] + feature_cols

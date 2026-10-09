@@ -164,8 +164,10 @@ def fetch_advanced_stats_br(season: str) -> pd.DataFrame:
     Fetch advanced stats (PER, WS, WS/48, BPM, VORP, TS%, USG%, etc.) from Basketball Reference.
     URL: .../leagues/NBA_{year}_advanced.html
     """
-    year = season.split("-")[1]
-    full_year = "20" + year
+    # Basketball-Reference uses the *ending* year in the URL.
+    # Example: season "1995-96" => ending year 1996 => NBA_1996_advanced.html.
+    start_year = int(str(season).split("-")[0])
+    full_year = start_year + 1
     url = f"https://www.basketball-reference.com/leagues/NBA_{full_year}_advanced.html"
     try:
         html = _fetch_br_html(url)
@@ -222,8 +224,9 @@ def fetch_advanced_stats_br(season: str) -> pd.DataFrame:
 
 def fetch_per_game_stats_br(season: str, min_games: int = 41) -> pd.DataFrame:
     """Fetch per-game PTS, TRB, AST from BR per_game table. One row per player (primary team)."""
-    year = season.split("-")[1]
-    full_year = "20" + year
+    # Basketball-Reference uses the *ending* year in the URL.
+    start_year = int(str(season).split("-")[0])
+    full_year = start_year + 1
     url = f"https://www.basketball-reference.com/leagues/NBA_{full_year}_per_game.html"
     try:
         html = _fetch_br_html(url)
@@ -259,8 +262,9 @@ def fetch_per_game_stats_br(season: str, min_games: int = 41) -> pd.DataFrame:
 
 def fetch_standings_br(season: str) -> pd.DataFrame:
     """Fetch team wins from BR standings. Returns team_abbr, season, team_wins."""
-    year = season.split("-")[1]
-    full_year = "20" + year
+    # Basketball-Reference uses the *ending* year in the URL.
+    start_year = int(str(season).split("-")[0])
+    full_year = start_year + 1
     url = f"https://www.basketball-reference.com/leagues/NBA_{full_year}_standings.html"
     try:
         html = _fetch_br_html(url)
@@ -336,6 +340,259 @@ ADVANCED_STAT_COLUMNS = [
 REGULAR_AND_WINS_COLUMNS = ["ppg", "rpg", "apg", "team_wins", "team_win_rank", "top_team_3", "games"]
 # Full feature set: advanced + regular + wins + rank.
 FULL_FEATURE_COLUMNS = ADVANCED_STAT_COLUMNS + REGULAR_AND_WINS_COLUMNS
+
+
+# ----------------------------
+# External-data fallback (no BR scraping)
+# ----------------------------
+# Basketball-Reference blocks automated requests here (Cloudflare 403). To keep the
+# MVP modeling pipeline working, we fall back to a public GitHub-hosted dataset
+# derived from Basketball-Reference tables.
+#
+# Dataset:
+#   https://github.com/sumitrodatta/bball-reference-datasets
+#
+# We only use season-level aggregates, so the behavior matches the original model.
+EXTERNAL_BASE = "https://raw.githubusercontent.com/sumitrodatta/bball-reference-datasets/master/Data"
+EXTERNAL_ADVANCED_URL = f"{EXTERNAL_BASE}/Advanced.csv"
+EXTERNAL_PER_GAME_URL = f"{EXTERNAL_BASE}/Player%20Per%20Game.csv"
+EXTERNAL_TEAM_SUMMARIES_URL = f"{EXTERNAL_BASE}/Team%20Summaries.csv"
+EXTERNAL_AWARD_SHARES_URL = f"{EXTERNAL_BASE}/Player%20Award%20Shares.csv"
+
+
+def _external_year_end_to_season_str(year_end: int) -> str:
+    """Convert ending year (e.g. 2025) => '2024-25'."""
+    start_year = int(year_end) - 1
+    end_short = str(int(year_end))[-2:]
+    return f"{start_year}-{end_short}"
+
+
+def _season_str_to_external_year_end(season: str) -> int:
+    """Convert '2024-25' => ending year 2025."""
+    start_year = int(str(season).split("-")[0])
+    return start_year + 1
+
+
+def _load_external_csv(url: str) -> pd.DataFrame:
+    """Load external CSV with pandas, relying on ssl context setup above."""
+    return pd.read_csv(url)
+
+
+def build_historical_dataset_external(
+    start_year: int = 1995,
+    end_year: int = 2025,
+    min_games: int = 41,
+) -> pd.DataFrame:
+    """
+    Build the same training dataset as `build_advanced_historical_dataset`, but using
+    external CSVs instead of scraping Basketball-Reference.
+
+    The external dataset uses `season` as the ending year (e.g. 2025 for 2024-25).
+    Our `start_year/end_year` inputs follow the same convention as the original code:
+      - start_year=1995,end_year=2025 => seasons '1995-96'..'2024-25' => ending years 1996..2025
+    """
+    year_end_start = int(start_year) + 1
+    year_end_end = int(end_year)
+
+    adv = _load_external_csv(EXTERNAL_ADVANCED_URL)
+    per = _load_external_csv(EXTERNAL_PER_GAME_URL)
+    teams = _load_external_csv(EXTERNAL_TEAM_SUMMARIES_URL)
+    awards = _load_external_csv(EXTERNAL_AWARD_SHARES_URL)
+
+    # Keep NBA only; dataset includes other leagues/competitions.
+    adv = adv[adv["lg"] == "NBA"].copy()
+    per = per[per["lg"] == "NBA"].copy()
+    teams = teams[teams["lg"] == "NBA"].copy()
+    awards = awards[awards["award"].astype(str).str.lower() == "nba mvp"].copy()
+
+    # Filter to training window by ending-year season.
+    adv["season"] = pd.to_numeric(adv["season"], errors="coerce")
+    per["season"] = pd.to_numeric(per["season"], errors="coerce")
+    teams["season"] = pd.to_numeric(teams["season"], errors="coerce")
+    awards["season"] = pd.to_numeric(awards["season"], errors="coerce")
+
+    adv = adv[(adv["season"] >= year_end_start) & (adv["season"] <= year_end_end)]
+    per = per[(per["season"] >= year_end_start) & (per["season"] <= year_end_end)]
+    teams = teams[(teams["season"] >= year_end_start) & (teams["season"] <= year_end_end)]
+    awards = awards[(awards["season"] >= year_end_start) & (awards["season"] <= year_end_end)]
+
+    # --- Advanced stats (one row per player-season) ---
+    adv = adv.rename(
+        columns={
+            "player": "player",
+            "team": "team_abbr",
+            "g": "games",
+            "ts_percent": "ts_pct",
+            "x3p_ar": "fg3ar",
+            "f_tr": "ftr",
+            "orb_percent": "orb_pct",
+            "drb_percent": "drb_pct",
+            "trb_percent": "trb_pct",
+            "ast_percent": "ast_pct",
+            "stl_percent": "stl_pct",
+            "blk_percent": "blk_pct",
+            "tov_percent": "tov_pct",
+            "usg_percent": "usg_pct",
+            "ws_48": "ws_per_48",
+        }
+    )
+    adv["games"] = pd.to_numeric(adv["games"], errors="coerce")
+    if "mp" in adv.columns:
+        adv["mp"] = pd.to_numeric(adv["mp"], errors="coerce")
+    # Drop duplicated player-season rows (trades) by max MP.
+    sort_cols = [c for c in ["season", "player_id", "mp", "games"] if c in adv.columns]
+    if "mp" in adv.columns:
+        adv = adv.sort_values(["season", "player_id", "mp"], ascending=[True, True, False])
+    else:
+        adv = adv.sort_values(["season", "player_id", "games"], ascending=[True, True, False])
+    adv = adv.drop_duplicates(subset=["season", "player_id"], keep="first")
+    adv = adv[adv["games"].fillna(0) >= min_games].copy()
+
+    # --- Per-game stats ---
+    per = per.rename(
+        columns={
+            "team": "team_abbr",
+            "g": "games",
+            "pts_per_game": "ppg",
+            "trb_per_game": "rpg",
+            "ast_per_game": "apg",
+        }
+    )
+    per["games"] = pd.to_numeric(per["games"], errors="coerce")
+    if "mp_per_game" in per.columns:
+        per["mp_per_game"] = pd.to_numeric(per["mp_per_game"], errors="coerce")
+        per = per.sort_values(["season", "player_id", "mp_per_game"], ascending=[True, True, False])
+    else:
+        per = per.sort_values(["season", "player_id", "games"], ascending=[True, True, False])
+    per = per.drop_duplicates(subset=["season", "player_id"], keep="first")
+    per = per[per["games"].fillna(0) >= min_games].copy()
+    per_small = per[["season", "player_id", "ppg", "rpg", "apg"]].copy()
+
+    player_df = adv.merge(per_small, on=["season", "player_id"], how="left")
+    # Some players may have advanced stats without enough per-game games.
+    # Keep the row and let modeling drop NaNs.
+
+    # --- Team wins (for contextual features) ---
+    teams = teams.rename(columns={"abbreviation": "team_abbr", "w": "team_wins"})
+    teams["team_wins"] = pd.to_numeric(teams["team_wins"], errors="coerce")
+    teams = teams[["season", "team_abbr", "team_wins"]].copy()
+    player_df = player_df.merge(teams, on=["season", "team_abbr"], how="left")
+
+    # Compute team_win_rank and top_team_3 within each season.
+    player_df["team_win_rank"] = (
+        player_df.groupby("season")["team_wins"]
+        .rank(method="min", ascending=False)
+        .astype("Int64")
+    )
+    player_df["top_team_3"] = (player_df["team_win_rank"] <= 3).fillna(False).astype(int)
+
+    # --- MVP labels ---
+    awards = awards[awards["winner"] == True].copy()
+    awards["player_id"] = awards["player_id"].astype(str)
+    mvp_df = awards[["season", "player_id"]].drop_duplicates().copy()
+    mvp_df["is_mvp"] = 1
+
+    player_df["player_clean"] = player_df["player"].apply(_normalize_player_name)
+    mvp_df["player_clean"] = mvp_df["player_id"].apply(lambda _: "")  # placeholder; not needed for merges
+
+    player_df = player_df.merge(mvp_df[["season", "player_id", "is_mvp"]], on=["season", "player_id"], how="left")
+    player_df["is_mvp"] = player_df["is_mvp"].fillna(0).astype(int)
+
+    # Convert external ending-year season into our 'YYYY-YY' format.
+    player_df["season"] = player_df["season"].apply(_external_year_end_to_season_str)
+
+    # Keep only columns we care about (plus identifiers used by the model/app).
+    cols_needed = set(FULL_FEATURE_COLUMNS) | {"season", "player", "player_id", "player_clean", "team_abbr", "is_mvp"}
+    keep_cols = [c for c in player_df.columns if c in cols_needed]
+    player_df = player_df[keep_cols].copy()
+
+    return player_df
+
+
+def fetch_current_season_advanced_external(
+    season: str = "2025-26",
+    min_games: int = 20,
+) -> pd.DataFrame:
+    """Fetch current season advanced+per-game+team_wins using external CSVs."""
+    year_end = _season_str_to_external_year_end(season)
+
+    adv = _load_external_csv(EXTERNAL_ADVANCED_URL)
+    per = _load_external_csv(EXTERNAL_PER_GAME_URL)
+    teams = _load_external_csv(EXTERNAL_TEAM_SUMMARIES_URL)
+
+    adv = adv[adv["lg"] == "NBA"].copy()
+    per = per[per["lg"] == "NBA"].copy()
+    teams = teams[teams["lg"] == "NBA"].copy()
+
+    adv["season"] = pd.to_numeric(adv["season"], errors="coerce")
+    per["season"] = pd.to_numeric(per["season"], errors="coerce")
+    teams["season"] = pd.to_numeric(teams["season"], errors="coerce")
+
+    adv = adv[adv["season"] == year_end].copy()
+    per = per[per["season"] == year_end].copy()
+    teams = teams[teams["season"] == year_end].copy()
+
+    adv = adv.rename(
+        columns={
+            "team": "team_abbr",
+            "g": "games",
+            "ts_percent": "ts_pct",
+            "x3p_ar": "fg3ar",
+            "f_tr": "ftr",
+            "orb_percent": "orb_pct",
+            "drb_percent": "drb_pct",
+            "trb_percent": "trb_pct",
+            "ast_percent": "ast_pct",
+            "stl_percent": "stl_pct",
+            "blk_percent": "blk_pct",
+            "tov_percent": "tov_pct",
+            "usg_percent": "usg_pct",
+            "ws_48": "ws_per_48",
+        }
+    )
+    adv["games"] = pd.to_numeric(adv["games"], errors="coerce")
+    if "mp" in adv.columns:
+        adv["mp"] = pd.to_numeric(adv["mp"], errors="coerce")
+        adv = adv.sort_values(["player_id", "mp"], ascending=[True, False])
+    adv = adv.drop_duplicates(subset=["player_id"], keep="first")
+    adv = adv[adv["games"].fillna(0) >= min_games].copy()
+
+    per = per.rename(
+        columns={
+            "team": "team_abbr",
+            "g": "games",
+            "pts_per_game": "ppg",
+            "trb_per_game": "rpg",
+            "ast_per_game": "apg",
+        }
+    )
+    per["games"] = pd.to_numeric(per["games"], errors="coerce")
+    if "mp_per_game" in per.columns:
+        per["mp_per_game"] = pd.to_numeric(per["mp_per_game"], errors="coerce")
+        per = per.sort_values(["player_id", "mp_per_game"], ascending=[True, False])
+    per = per.drop_duplicates(subset=["player_id"], keep="first")
+    per = per[per["games"].fillna(0) >= min_games].copy()
+    per_small = per[["player_id", "ppg", "rpg", "apg"]].copy()
+
+    player_df = adv.merge(per_small, on=["player_id"], how="left")
+
+    teams = teams.rename(columns={"abbreviation": "team_abbr", "w": "team_wins"})
+    teams["team_wins"] = pd.to_numeric(teams["team_wins"], errors="coerce")
+    teams = teams[["team_abbr", "team_wins"]].copy()
+    player_df = player_df.merge(teams, on=["team_abbr"], how="left")
+
+    player_df["team_win_rank"] = (
+        player_df["team_wins"].rank(method="min", ascending=False).astype("Int64")
+    )
+    player_df["top_team_3"] = (player_df["team_win_rank"] <= 3).fillna(False).astype(int)
+
+    player_df["player_clean"] = player_df["player"].apply(_normalize_player_name)
+    player_df["season"] = _external_year_end_to_season_str(year_end)
+
+    cols_needed = set(FULL_FEATURE_COLUMNS) | {"season", "player", "player_id", "player_clean", "team_abbr"}
+    keep_cols = [c for c in player_df.columns if c in cols_needed]
+    player_df = player_df[keep_cols].copy()
+    return player_df
 
 
 def build_historical_dataset(
@@ -457,10 +714,10 @@ def build_advanced_historical_dataset(
     mvp_df = fetch_mvp_history()
     _br_delay()
     if mvp_df.empty or "season" not in mvp_df.columns:
-        raise RuntimeError(
-            "Could not fetch MVP history from Basketball Reference (rate limited, 403, or page changed). "
-            "Wait a few minutes and try again, or use cached data: keep data/historical_advanced.csv and re-run."
-        )
+        # Basketball-Reference is blocked here (Cloudflare 403), so fall back to
+        # a public dataset derived from the same tables.
+        print("Basketball-Reference scraping failed; using external dataset fallback.")
+        return build_historical_dataset_external(start_year=start_year, end_year=end_year, min_games=min_games)
     seasons = get_season_list(start_year=start_year, end_year=end_year)
     mvp_df["season"] = mvp_df["season"].apply(_normalize_season)
     mvp_df = mvp_df[mvp_df["season"].isin(seasons)].copy()
@@ -532,7 +789,8 @@ def fetch_current_season_advanced(season: str = "2025-26", min_games: int = 20) 
     """Fetch advanced + per-game stats + team wins for current season (same formula as historical)."""
     df = fetch_advanced_stats_br(season)
     if df.empty:
-        return df
+        # Basketball-Reference is blocked here; use the external dataset instead.
+        return fetch_current_season_advanced_external(season=season, min_games=min_games)
     if "games" in df.columns:
         df["games"] = pd.to_numeric(df["games"], errors="coerce")
         df = df[df["games"].fillna(0) >= min_games].copy()

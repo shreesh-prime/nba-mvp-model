@@ -1,0 +1,68 @@
+{
+  "last_updated": "2026-03-18 21:49 UTC",
+  "season": "2025-26",
+  "top1_name": "Shai Gilgeous-Alexander",
+  "top1_team": "OKC",
+  "top10": [
+    {
+      "rank": 1,
+      "player": "Shai Gilgeous-Alexander",
+      "team": "OKC",
+      "score": 0.9973999385391397
+    },
+    {
+      "rank": 2,
+      "player": "Nikola Joki\u0107",
+      "team": "DEN",
+      "score": 0.9452557685017633
+    },
+    {
+      "rank": 3,
+      "player": "Cade Cunningham",
+      "team": "DET",
+      "score": 0.9213430625696772
+    },
+    {
+      "rank": 4,
+      "player": "Jalen Duren",
+      "team": "DET",
+      "score": 0.8727585580471066
+    },
+    {
+      "rank": 5,
+      "player": "Victor Wembanyama",
+      "team": "SAS",
+      "score": 0.8264168725649644
+    },
+    {
+      "rank": 6,
+      "player": "Jamal Murray",
+      "team": "DEN",
+      "score": 0.6880206229850183
+    },
+    {
+      "rank": 7,
+      "player": "Donovan Mitchell",
+      "team": "CLE",
+      "score": 0.6728192374580569
+    },
+    {
+      "rank": 8,
+      "player": "Luka Don\u010di\u0107",
+      "team": "LAL",
+      "score": 0.6722096032540904
+    },
+    {
+      "rank": 9,
+      "player": "Jalen Brunson",
+      "team": "NYK",
+      "score": 0.5435784647265989
+    },
+    {
+      "rank": 10,
+      "player": "Kevin Durant",
+      "team": "HOU",
+      "score": 0.5219930140376726
+    }
+  ]
+}

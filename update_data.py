@@ -17,6 +17,9 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE, "data")
 MODEL_DIR = os.path.join(BASE, "model")
 OUTPUT_PATH = os.path.join(DATA_DIR, "current_season_prediction.json")
+MODEL_METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
+
+from mvp_model import apply_within_season_ranks
 
 
 def main():
@@ -43,15 +46,33 @@ def main():
     with open(features_path) as f:
         feature_cols = json.load(f)
 
+    use_within_season_ranks = False
+    if os.path.isfile(MODEL_METADATA_PATH):
+        try:
+            with open(MODEL_METADATA_PATH) as f:
+                use_within_season_ranks = json.load(f).get("use_within_season_ranks", False)
+        except Exception:
+            use_within_season_ranks = False
+
     missing = [c for c in feature_cols if c not in current.columns]
     if missing:
         print("Current data missing columns:", missing)
         return
 
-    X = current[feature_cols].fillna(0)
+    if use_within_season_ranks:
+        current = apply_within_season_ranks(current, feature_cols)
+
+    mask = current[feature_cols].notna().all(axis=1)
+    current = current[mask].copy()
+    if current.empty:
+        print("No players had complete feature values for prediction.")
+        return
+    X = current[feature_cols].astype(float)
     X_s = scaler.transform(X)
-    current = current.copy()
-    current["mvp_score"] = model.predict(X_s)
+    if hasattr(model, "predict_proba"):
+        current["mvp_score"] = model.predict_proba(X_s)[:, 1]
+    else:
+        current["mvp_score"] = model.predict(X_s)
     current["mvp_rank"] = current["mvp_score"].rank(ascending=False).astype(int)
     top10_df = current.nsmallest(10, "mvp_rank")
 

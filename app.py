@@ -9,6 +9,7 @@ import csv
 from datetime import datetime
 
 from flask import Flask, render_template_string, request, jsonify
+from mvp_model import apply_within_season_ranks
 
 app = Flask(__name__)
 
@@ -20,6 +21,7 @@ BACKTEST_DETAILS_PATH = os.path.join(DATA_DIR, "backtest_season_details.json")
 CURRENT_PREDICTION_PATH = os.path.join(DATA_DIR, "current_season_prediction.json")
 FEATURE_CORR_PATH = os.path.join(DATA_DIR, "mvp_feature_correlations.json")
 FEATURE_COLS_PATH = os.path.join(MODEL_DIR, "feature_cols.json")
+MODEL_METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
 
 
 def get_season_list():
@@ -95,16 +97,31 @@ def compute_current_season_prediction():
             feature_cols = json.load(f)
         model = joblib.load(model_path)
         scaler = joblib.load(scaler_path)
+        use_within_season_ranks = False
+        if os.path.isfile(MODEL_METADATA_PATH):
+            try:
+                with open(MODEL_METADATA_PATH) as f:
+                    use_within_season_ranks = json.load(f).get("use_within_season_ranks", False)
+            except Exception:
+                use_within_season_ranks = False
         current = fetch_current_season_advanced(season="2025-26", min_games=20)
         if current.empty:
             return {"_error": "Could not fetch 2025-26 stats from Basketball Reference. Try again later."}
         missing = [c for c in feature_cols if c not in current.columns]
         if missing:
             return {"_error": f"Data missing columns: {missing}. Re-run python3 mvp_model.py to retrain."}
-        X = current[feature_cols].fillna(0)
+        if use_within_season_ranks:
+            current = apply_within_season_ranks(current, feature_cols)
+        mask = current[feature_cols].notna().all(axis=1)
+        current = current[mask].copy()
+        if current.empty:
+            return {"_error": "No players had complete feature values for prediction."}
+        X = current[feature_cols].astype(float)
         X_s = scaler.transform(X)
-        current = current.copy()
-        current["mvp_score"] = model.predict(X_s)
+        if hasattr(model, "predict_proba"):
+            current["mvp_score"] = model.predict_proba(X_s)[:, 1]
+        else:
+            current["mvp_score"] = model.predict(X_s)
         current["mvp_rank"] = current["mvp_score"].rank(ascending=False).astype(int)
         top10_df = current.nsmallest(10, "mvp_rank")
         top10 = [{"rank": int(row["mvp_rank"]), "player": str(row.get("player", "")), "team": str(row.get("team_abbr", "")), "score": float(row["mvp_score"])} for _, row in top10_df.iterrows()]
