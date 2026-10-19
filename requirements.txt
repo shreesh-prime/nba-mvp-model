@@ -1,13 +1,15 @@
 # NBA MVP Prediction Model
-flask>=3.0.0
-pandas>=2.0.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
-nba_api>=1.4.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-jupyter>=1.0.0
+flask>=3.0,<4
+gunicorn>=21.2
+pandas>=2.0,<4
+numpy>=1.24,<3
+scipy>=1.11,<2
+# Saved models in model/ were pickled with scikit-learn 1.8; keep the minor version in sync.
+scikit-learn>=1.8,<1.9
+joblib>=1.3
+requests>=2.31,<3
+beautifulsoup4>=4.12,<5
+lxml>=4.9
+nba_api>=1.4
+matplotlib>=3.7,<4
 certifi>=2023.0.0

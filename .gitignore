@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+.env
+
+# OS
+.DS_Store
+
+# data/*.csv, data/*.json, data/*.png and model/*.joblib are committed on purpose
+# so the app works right after cloning.
