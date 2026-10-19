@@ -1,38 +1,28 @@
 """
-Load the trained MVP model (Ridge regression on key correlating factors) and predict this season's top candidates.
+Load a trained MVP model and predict this season's top candidates.
 Run mvp_model.py first to train and save the model.
+
+  python3 predict_mvp.py                   # legacy model in model/ (what app.py uses)
+  python3 predict_mvp.py --variant logtop  # Ridge vote-share variant in model/logtop/
 """
-import os
-import json
-import joblib
-
 from data.fetch_data import fetch_current_season_advanced
-from mvp_model import apply_within_season_ranks
+from mvp_model import apply_within_season_ranks, load_variant_artifacts, score_players, MODEL_VARIANTS
+from season_utils import current_season
+
+# Variant used by predict(); None = legacy un-suffixed model files. Set from --variant on the CLI.
+PREDICT_VARIANT: str | None = None
 
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
-MODEL_METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
+def load_model(variant: str | None = None):
+    """Load (model, scaler, feature_cols, info) from model/<variant>/, or the legacy model/ files if None."""
+    return load_variant_artifacts(variant)
 
 
-def load_model():
-    """Load Ridge model, scaler, and feature columns from disk."""
-    model = joblib.load(os.path.join(MODEL_DIR, "ridge_model.joblib"))
-    scaler = joblib.load(os.path.join(MODEL_DIR, "scaler.joblib"))
-    with open(os.path.join(MODEL_DIR, "feature_cols.json")) as f:
-        feature_cols = json.load(f)
-    return model, scaler, feature_cols
-
-
-def predict(season: str = "2025-26", min_games: int = 20, top_n: int = 10):
-    """Predict top MVP candidates for the given season (ranked by MVP probability)."""
-    model, scaler, feature_cols = load_model()
-    use_within_season_ranks = False
-    if os.path.isfile(MODEL_METADATA_PATH):
-        try:
-            with open(MODEL_METADATA_PATH) as f:
-                use_within_season_ranks = json.load(f).get("use_within_season_ranks", False)
-        except Exception:
-            use_within_season_ranks = False
+def predict(season: str | None = None, min_games: int = 20, top_n: int = 10):
+    """Predict top MVP candidates for the given season (default: current) with PREDICT_VARIANT's model."""
+    season = season or current_season()
+    model, scaler, feature_cols, info = load_model(PREDICT_VARIANT)
+    use_within_season_ranks = info["use_within_season_ranks"]
     current = fetch_current_season_advanced(season=season, min_games=min_games)
     if current.empty:
         print(f"No data for {season}. Try a different season or check Basketball Reference.")
@@ -41,27 +31,30 @@ def predict(season: str = "2025-26", min_games: int = 20, top_n: int = 10):
     if missing:
         print(f"Current data missing columns: {missing}. Re-run mvp_model.py to retrain.")
         return None
+    if "vorp" in current.columns:
+        current["_raw_vorp"] = current["vorp"]
     if use_within_season_ranks:
-        current = apply_within_season_ranks(current, feature_cols)
+        current = apply_within_season_ranks(current, feature_cols, transform=info["rank_transform"])
     mask = current[feature_cols].notna().all(axis=1)
     current = current[mask].copy()
     if current.empty:
         print("No players had complete feature values for prediction.")
         return None
-    X = current[feature_cols].astype(float)
-    X_s = scaler.transform(X)
-    if hasattr(model, "predict_proba"):
-        current["mvp_score"] = model.predict_proba(X_s)[:, 1]
-    else:
-        current["mvp_score"] = model.predict(X_s)
-    current["mvp_rank"] = current["mvp_score"].rank(ascending=False).astype(int)
+    current["mvp_score"] = score_players(current, model, scaler, feature_cols)
+    current["mvp_rank"] = current["mvp_score"].rank(ascending=False, method="first").astype(int)
     top = current.nsmallest(top_n, "mvp_rank")[
         ["player", "team_abbr", "mvp_rank", "mvp_score"] + feature_cols
     ]
-    print(f"Top {top_n} MVP candidates for {season}")
+    print(f"Top {top_n} MVP candidates for {season} (model: {info['variant'] or 'legacy'})")
     print(top.to_string(index=False))
     return top
 
 
 if __name__ == "__main__":
-    predict(season="2025-26", min_games=20, top_n=10)
+    import argparse
+    parser = argparse.ArgumentParser(description="Predict this season's MVP candidates.")
+    parser.add_argument("--variant", default=None, choices=list(MODEL_VARIANTS))
+    parser.add_argument("--season", default=None, help="e.g. 2025-26 (default: current season)")
+    args = parser.parse_args()
+    PREDICT_VARIANT = args.variant
+    predict(season=args.season, min_games=20, top_n=10)

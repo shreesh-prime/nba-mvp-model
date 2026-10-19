@@ -1,5 +1,5 @@
 """
-Refresh 2025-26 stats and update the current-season MVP prediction.
+Refresh current-season stats and update the current-season MVP prediction.
 Run daily (e.g. via cron) so the app always shows up-to-date predictions.
 
 Usage:
@@ -20,6 +20,7 @@ OUTPUT_PATH = os.path.join(DATA_DIR, "current_season_prediction.json")
 MODEL_METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
 
 from mvp_model import apply_within_season_ranks
+from season_utils import current_season
 
 
 def main():
@@ -35,10 +36,11 @@ def main():
 
     from data.fetch_data import fetch_current_season_advanced
 
-    print("Fetching 2025-26 advanced stats from Basketball Reference...")
-    current = fetch_current_season_advanced(season="2025-26", min_games=20)
+    season = current_season()
+    print(f"Fetching {season} advanced stats from Basketball Reference...")
+    current = fetch_current_season_advanced(season=season, min_games=20)
     if current.empty:
-        print("No data for 2025-26. Check Basketball Reference or try again later.")
+        print(f"No data for {season}. Check Basketball Reference or try again later.")
         return
 
     model = joblib.load(model_path)
@@ -88,7 +90,7 @@ def main():
     top1 = top10[0] if top10 else {}
     result = {
         "last_updated": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
-        "season": "2025-26",
+        "season": season,
         "top1_name": top1.get("player", "—"),
         "top1_team": top1.get("team", ""),
         "top10": top10,

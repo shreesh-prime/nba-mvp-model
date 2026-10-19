@@ -1,0 +1,2672 @@
+{
+  "1995-96": {
+    "actual_mvp": "Michael Jordan",
+    "predicted_mvp": "Michael Jordan",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.592047770207087,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Michael Jordan",
+        "team": "CHI",
+        "score": 0.23770636925482125,
+        "actual_share": 0.986,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "David Robinson",
+        "team": "SAS",
+        "score": 0.1585112104705474,
+        "actual_share": 0.508,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 3,
+        "player": "Karl Malone",
+        "team": "UTA",
+        "score": 0.15374428969995477,
+        "actual_share": 0.075,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 4,
+        "player": "Terrell Brandon",
+        "team": "CLE",
+        "score": 0.14201883462544473,
+        "actual_share": 0.003,
+        "actual_vote_rank": 16.0
+      },
+      {
+        "rank": 5,
+        "player": "Anfernee Hardaway",
+        "team": "ORL",
+        "score": 0.13436141814902278,
+        "actual_share": 0.319,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Shawn Kemp",
+        "team": "SEA",
+        "score": 0.11863259815251086,
+        "actual_share": 0.065,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 7,
+        "player": "Shaquille O'Neal",
+        "team": "ORL",
+        "score": 0.11857126648789347,
+        "actual_share": 0.056,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 8,
+        "player": "Scottie Pippen",
+        "team": "CHI",
+        "score": 0.11838455807941285,
+        "actual_share": 0.2,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 9,
+        "player": "Hakeem Olajuwon",
+        "team": "HOU",
+        "score": 0.11076463045218017,
+        "actual_share": 0.211,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 10,
+        "player": "Alonzo Mourning",
+        "team": "MIA",
+        "score": 0.10592342591300852,
+        "actual_share": 0.005,
+        "actual_vote_rank": 14.0
+      }
+    ]
+  },
+  "1996-97": {
+    "actual_mvp": "Karl Malone",
+    "predicted_mvp": "Michael Jordan",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.6707102183748994,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Michael Jordan",
+        "team": "CHI",
+        "score": 0.23995213954343578,
+        "actual_share": 0.832,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 2,
+        "player": "Karl Malone",
+        "team": "UTA",
+        "score": 0.19226854433112192,
+        "actual_share": 0.857,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Grant Hill",
+        "team": "DET",
+        "score": 0.137170910400423,
+        "actual_share": 0.327,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 4,
+        "player": "Tim Hardaway",
+        "team": "MIA",
+        "score": 0.13123041041860323,
+        "actual_share": 0.207,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 5,
+        "player": "Scottie Pippen",
+        "team": "CHI",
+        "score": 0.12145105530228228,
+        "actual_share": 0.005,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 6,
+        "player": "John Stockton",
+        "team": "UTA",
+        "score": 0.112046889576469,
+        "actual_share": 0.003,
+        "actual_vote_rank": 15.0
+      },
+      {
+        "rank": 7,
+        "player": "Terrell Brandon",
+        "team": "CLE",
+        "score": 0.10177344900442281,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Reggie Miller",
+        "team": "IND",
+        "score": 0.0979482522531735,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.09691442391218527,
+        "actual_share": 0.006,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 10,
+        "player": "Alonzo Mourning",
+        "team": "MIA",
+        "score": 0.09459769310408336,
+        "actual_share": 0.004,
+        "actual_vote_rank": 12.0
+      }
+    ]
+  },
+  "1997-98": {
+    "actual_mvp": "Michael Jordan",
+    "predicted_mvp": "Michael Jordan",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.8168650041099763,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Michael Jordan",
+        "team": "CHI",
+        "score": 0.2189821881126197,
+        "actual_share": 0.934,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Karl Malone",
+        "team": "UTA",
+        "score": 0.20260143607216416,
+        "actual_share": 0.726,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 3,
+        "player": "David Robinson",
+        "team": "SAS",
+        "score": 0.18768751186132016,
+        "actual_share": 0.031,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 4,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.16033067094506925,
+        "actual_share": 0.268,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 5,
+        "player": "Gary Payton",
+        "team": "SEA",
+        "score": 0.12094943920310892,
+        "actual_share": 0.372,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.11014649857619953,
+        "actual_share": 0.128,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 7,
+        "player": "Reggie Miller",
+        "team": "IND",
+        "score": 0.10321152393766575,
+        "actual_share": 0.002,
+        "actual_vote_rank": 16.0
+      },
+      {
+        "rank": 8,
+        "player": "Tim Hardaway",
+        "team": "MIA",
+        "score": 0.10036794187415013,
+        "actual_share": 0.061,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 9,
+        "player": "Scottie Pippen",
+        "team": "CHI",
+        "score": 0.09413360834016773,
+        "actual_share": 0.012,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 10,
+        "player": "Grant Hill",
+        "team": "DET",
+        "score": 0.09136286726193998,
+        "actual_share": 0.02,
+        "actual_vote_rank": 9.0
+      }
+    ]
+  },
+  "1998-99": {
+    "actual_mvp": "Karl Malone",
+    "predicted_mvp": "Karl Malone",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.7131715003954241,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Karl Malone",
+        "team": "UTA",
+        "score": 0.18404418481198942,
+        "actual_share": 0.701,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.15703590513893184,
+        "actual_share": 0.075,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 3,
+        "player": "Allen Iverson",
+        "team": "PHI",
+        "score": 0.13912600429454686,
+        "actual_share": 0.27,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 4,
+        "player": "David Robinson",
+        "team": "SAS",
+        "score": 0.13820620407236642,
+        "actual_share": 0.005,
+        "actual_vote_rank": 12.0
+      },
+      {
+        "rank": 5,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.12320886268043485,
+        "actual_share": 0.627,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Grant Hill",
+        "team": "DET",
+        "score": 0.10890409501434795,
+        "actual_share": 0.033,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 7,
+        "player": "John Stockton",
+        "team": "UTA",
+        "score": 0.09219465110022966,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Shawn Kemp",
+        "team": "CLE",
+        "score": 0.09048530796443142,
+        "actual_share": 0.006,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 9,
+        "player": "Alonzo Mourning",
+        "team": "MIA",
+        "score": 0.08901931745531788,
+        "actual_share": 0.655,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 10,
+        "player": "Arvydas Sabonis",
+        "team": "POR",
+        "score": 0.08557743045542472,
+        "actual_share": 0.003,
+        "actual_vote_rank": 13.0
+      }
+    ]
+  },
+  "1999-00": {
+    "actual_mvp": "Shaquille O'Neal",
+    "predicted_mvp": "Shaquille O'Neal",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.7540947628287338,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.20543994445216596,
+        "actual_share": 0.998,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Karl Malone",
+        "team": "UTA",
+        "score": 0.1768539311980996,
+        "actual_share": 0.258,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 3,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.1249671708359454,
+        "actual_share": 0.205,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 4,
+        "player": "Grant Hill",
+        "team": "DET",
+        "score": 0.12458618732278157,
+        "actual_share": 0.093,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 5,
+        "player": "Alonzo Mourning",
+        "team": "MIA",
+        "score": 0.11940587955816007,
+        "actual_share": 0.303,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Gary Payton",
+        "team": "SEA",
+        "score": 0.1170027870704705,
+        "actual_share": 0.149,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 7,
+        "player": "Vince Carter",
+        "team": "TOR",
+        "score": 0.11615740118018879,
+        "actual_share": 0.042,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 8,
+        "player": "David Robinson",
+        "team": "SAS",
+        "score": 0.11545423993204312,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.11163594319477148,
+        "actual_share": 0.002,
+        "actual_vote_rank": 12.0
+      },
+      {
+        "rank": 10,
+        "player": "Allen Iverson",
+        "team": "PHI",
+        "score": 0.10928178193036459,
+        "actual_share": 0.109,
+        "actual_vote_rank": 7.0
+      }
+    ]
+  },
+  "2000-01": {
+    "actual_mvp": "Allen Iverson",
+    "predicted_mvp": "Shaquille O'Neal",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.6699588677586474,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.18925057222745034,
+        "actual_share": 0.466,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 2,
+        "player": "Allen Iverson",
+        "team": "PHI",
+        "score": 0.16979128533194976,
+        "actual_share": 0.904,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.13949776698724636,
+        "actual_share": 0.009,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 4,
+        "player": "David Robinson",
+        "team": "SAS",
+        "score": 0.1368800041850758,
+        "actual_share": 0.006,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 5,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.136545170123332,
+        "actual_share": 0.569,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 6,
+        "player": "Karl Malone",
+        "team": "UTA",
+        "score": 0.13350221239315807,
+        "actual_share": 0.017,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 7,
+        "player": "Vince Carter",
+        "team": "TOR",
+        "score": 0.13206235379072118,
+        "actual_share": 0.006,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 8,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.11486367627843978,
+        "actual_share": 0.052,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 9,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.10885511273580815,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Chris Webber",
+        "team": "SAC",
+        "score": 0.10666254379427519,
+        "actual_share": 0.42,
+        "actual_vote_rank": 4.0
+      }
+    ]
+  },
+  "2001-02": {
+    "actual_mvp": "Tim Duncan",
+    "predicted_mvp": "Shaquille O'Neal",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.5980361444833132,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.18738306570917723,
+        "actual_share": 0.552,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 2,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.18183740335911514,
+        "actual_share": 0.757,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.15058530379313578,
+        "actual_share": 0.078,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 4,
+        "player": "Paul Pierce",
+        "team": "BOS",
+        "score": 0.12793578608500014,
+        "actual_share": 0.017,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 5,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.11986091386067704,
+        "actual_share": 0.31,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 6,
+        "player": "Chris Webber",
+        "team": "SAC",
+        "score": 0.11621910920919304,
+        "actual_share": 0.029,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 7,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.11285619805447202,
+        "actual_share": 0.025,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 8,
+        "player": "Allen Iverson",
+        "team": "PHI",
+        "score": 0.1126885016406945,
+        "actual_share": 0.023,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 9,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.1087452797383565,
+        "actual_share": 0.013,
+        "actual_vote_rank": 12.0
+      },
+      {
+        "rank": 10,
+        "player": "David Robinson",
+        "team": "SAS",
+        "score": 0.09646681087956897,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2002-03": {
+    "actual_mvp": "Tim Duncan",
+    "predicted_mvp": "Tracy McGrady",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.5856442973164196,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.20252367354037829,
+        "actual_share": 0.359,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 2,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.1670736107188014,
+        "actual_share": 0.808,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.15120386406651892,
+        "actual_share": 0.036,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 4,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.14251025334946982,
+        "actual_share": 0.417,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 5,
+        "player": "Shaquille O'Neal",
+        "team": "LAL",
+        "score": 0.13996932265737977,
+        "actual_share": 0.106,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 6,
+        "player": "Paul Pierce",
+        "team": "BOS",
+        "score": 0.12180815757549206,
+        "actual_share": 0.001,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 7,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.11376477654012954,
+        "actual_share": 0.732,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 8,
+        "player": "Steve Nash",
+        "team": "DAL",
+        "score": 0.10671648364943417,
+        "actual_share": 0.001,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 9,
+        "player": "Chris Webber",
+        "team": "SAC",
+        "score": 0.10241134854175254,
+        "actual_share": 0.016,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 10,
+        "player": "Allen Iverson",
+        "team": "PHI",
+        "score": 0.09836864850626596,
+        "actual_share": 0.07,
+        "actual_vote_rank": 6.0
+      }
+    ]
+  },
+  "2003-04": {
+    "actual_mvp": "Kevin Garnett",
+    "predicted_mvp": "Kevin Garnett",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.5266364385184054,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.19554372504392362,
+        "actual_share": 0.991,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.1801833509113223,
+        "actual_share": 0.582,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 3,
+        "player": "Sam Cassell",
+        "team": "MIN",
+        "score": 0.13690402109732078,
+        "actual_share": 0.003,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 4,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.12916395283000698,
+        "actual_share": 0.172,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 5,
+        "player": "Jermaine O'Neal",
+        "team": "IND",
+        "score": 0.11268383963800205,
+        "actual_share": 0.425,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Tracy McGrady",
+        "team": "ORL",
+        "score": 0.10665859194826179,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 7,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.0975653566708955,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Peja Stojakovi\u0107",
+        "team": "SAC",
+        "score": 0.09747276995302423,
+        "actual_share": 0.228,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 9,
+        "player": "Chauncey Billups",
+        "team": "DET",
+        "score": 0.09740887111798195,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Yao Ming",
+        "team": "HOU",
+        "score": 0.09518909547852093,
+        "actual_share": 0.001,
+        "actual_vote_rank": 14.0
+      }
+    ]
+  },
+  "2004-05": {
+    "actual_mvp": "Steve Nash",
+    "predicted_mvp": "Dirk Nowitzki",
+    "correct": false,
+    "actual_rank_in_model": 22.0,
+    "spearman_vote_share": 0.48789728226723905,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.1559429497384324,
+        "actual_share": 0.275,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 2,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.1529337271010301,
+        "actual_share": 0.258,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 3,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.15274137469832416,
+        "actual_share": 0.012,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 4,
+        "player": "Tracy McGrady",
+        "team": "HOU",
+        "score": 0.13411948910011723,
+        "actual_share": 0.035,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 5,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.13393945246105574,
+        "actual_share": 0.073,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 6,
+        "player": "Shaquille O'Neal",
+        "team": "MIA",
+        "score": 0.13365942980964904,
+        "actual_share": 0.813,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 7,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.1269169538135865,
+        "actual_share": 0.034,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 8,
+        "player": "Amar'e Stoudemire",
+        "team": "PHO",
+        "score": 0.1239852954636905,
+        "actual_share": 0.032,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 9,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.12236365842419585,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Allen Iverson",
+        "team": "PHI",
+        "score": 0.11018108002916098,
+        "actual_share": 0.189,
+        "actual_vote_rank": 5.0
+      }
+    ]
+  },
+  "2005-06": {
+    "actual_mvp": "Steve Nash",
+    "predicted_mvp": "Dirk Nowitzki",
+    "correct": false,
+    "actual_rank_in_model": 23.0,
+    "spearman_vote_share": 0.4054680223446026,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.18470552891139316,
+        "actual_share": 0.435,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 2,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.17283806498586654,
+        "actual_share": 0.386,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 3,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.15379562202798233,
+        "actual_share": 0.55,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 4,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.13849144825277315,
+        "actual_share": 0.07,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 5,
+        "player": "Kevin Garnett",
+        "team": "MIN",
+        "score": 0.13501198482767626,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 6,
+        "player": "Chauncey Billups",
+        "team": "DET",
+        "score": 0.1302805025033076,
+        "actual_share": 0.344,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 7,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.12618278537768776,
+        "actual_share": 0.026,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 8,
+        "player": "Allen Iverson",
+        "team": "PHI",
+        "score": 0.11928402648783362,
+        "actual_share": 0.001,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 9,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.11755858058432837,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Gilbert Arenas",
+        "team": "WAS",
+        "score": 0.11669929341375118,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2006-07": {
+    "actual_mvp": "Dirk Nowitzki",
+    "predicted_mvp": "Dirk Nowitzki",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.6543638841354886,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.17714617558532708,
+        "actual_share": 0.882,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.1656004291131708,
+        "actual_share": 0.222,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 3,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.1574811701976276,
+        "actual_share": 0.142,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 4,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.15284090681107404,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 5,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.1486108054172649,
+        "actual_share": 0.404,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Tracy McGrady",
+        "team": "HOU",
+        "score": 0.14224563075839367,
+        "actual_share": 0.085,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 7,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.13300070981782108,
+        "actual_share": 0.002,
+        "actual_vote_rank": 12.0
+      },
+      {
+        "rank": 8,
+        "player": "Yao Ming",
+        "team": "HOU",
+        "score": 0.1203145873290172,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Steve Nash",
+        "team": "PHO",
+        "score": 0.11828917240507184,
+        "actual_share": 0.785,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 10,
+        "player": "Tony Parker",
+        "team": "SAS",
+        "score": 0.11238472859569118,
+        "actual_share": 0.001,
+        "actual_vote_rank": 15.0
+      }
+    ]
+  },
+  "2007-08": {
+    "actual_mvp": "Kobe Bryant",
+    "predicted_mvp": "Kobe Bryant",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.6658572910021582,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.17723943623791455,
+        "actual_share": 0.873,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.17353180860053707,
+        "actual_share": 0.348,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 3,
+        "player": "Chris Paul",
+        "team": "NOH",
+        "score": 0.13515488419731875,
+        "actual_share": 0.71,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 4,
+        "player": "Kevin Garnett",
+        "team": "BOS",
+        "score": 0.13253360673034148,
+        "actual_share": 0.532,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 5,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.12979067418300566,
+        "actual_share": 0.004,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 6,
+        "player": "Amar'e Stoudemire",
+        "team": "PHO",
+        "score": 0.1280845267098027,
+        "actual_share": 0.021,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 7,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.12355354258139754,
+        "actual_share": 0.007,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 8,
+        "player": "Chauncey Billups",
+        "team": "DET",
+        "score": 0.11855860301499146,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Paul Pierce",
+        "team": "BOS",
+        "score": 0.11353388701714437,
+        "actual_share": 0.001,
+        "actual_vote_rank": 14.0
+      },
+      {
+        "rank": 10,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.11149020450712252,
+        "actual_share": 0.02,
+        "actual_vote_rank": 7.0
+      }
+    ]
+  },
+  "2008-09": {
+    "actual_mvp": "LeBron James",
+    "predicted_mvp": "LeBron James",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.8747175313501542,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.21699000707297972,
+        "actual_share": 0.969,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.1717664837309195,
+        "actual_share": 0.562,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 3,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.1644674834749624,
+        "actual_share": 0.577,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 4,
+        "player": "Chris Paul",
+        "team": "NOH",
+        "score": 0.14877548412655453,
+        "actual_share": 0.159,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 5,
+        "player": "Dwight Howard",
+        "team": "ORL",
+        "score": 0.11594411261504334,
+        "actual_share": 0.271,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 6,
+        "player": "Brandon Roy",
+        "team": "POR",
+        "score": 0.11285306903922133,
+        "actual_share": 0.006,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 7,
+        "player": "Pau Gasol",
+        "team": "LAL",
+        "score": 0.1120069552564767,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.10903275441920565,
+        "actual_share": 0.002,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 9,
+        "player": "Paul Pierce",
+        "team": "BOS",
+        "score": 0.10733865310764236,
+        "actual_share": 0.017,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 10,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.10647823653832895,
+        "actual_share": 0.002,
+        "actual_vote_rank": 11.0
+      }
+    ]
+  },
+  "2009-10": {
+    "actual_mvp": "LeBron James",
+    "predicted_mvp": "LeBron James",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.7483516644524486,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.2214730962143809,
+        "actual_share": 0.98,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.19299063201723715,
+        "actual_share": 0.097,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 3,
+        "player": "Kevin Durant",
+        "team": "OKC",
+        "score": 0.16249898858726292,
+        "actual_share": 0.495,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 4,
+        "player": "Dwight Howard",
+        "team": "ORL",
+        "score": 0.13367601890474967,
+        "actual_share": 0.389,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 5,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.1319900694864012,
+        "actual_share": 0.487,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.12675057512712606,
+        "actual_share": 0.045,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 7,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.10955634264974357,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.10795946449419579,
+        "actual_share": 0.002,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 9,
+        "player": "Pau Gasol",
+        "team": "LAL",
+        "score": 0.1068854123317326,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Chris Bosh",
+        "team": "TOR",
+        "score": 0.09133947759456178,
+        "actual_share": 0.001,
+        "actual_vote_rank": 12.0
+      }
+    ]
+  },
+  "2010-11": {
+    "actual_mvp": "Derrick Rose",
+    "predicted_mvp": "LeBron James",
+    "correct": false,
+    "actual_rank_in_model": 3.0,
+    "spearman_vote_share": 0.8071655972464261,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "MIA",
+        "score": 0.21060098893317875,
+        "actual_share": 0.431,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 2,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.16952070354328622,
+        "actual_share": 0.02,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 3,
+        "player": "Derrick Rose",
+        "team": "CHI",
+        "score": 0.16545930811271606,
+        "actual_share": 0.977,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 4,
+        "player": "Dwight Howard",
+        "team": "ORL",
+        "score": 0.13987974061755026,
+        "actual_share": 0.531,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 5,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.13423617224951065,
+        "actual_share": 0.354,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 6,
+        "player": "Kevin Durant",
+        "team": "OKC",
+        "score": 0.11453173903604356,
+        "actual_share": 0.157,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 7,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.11358561953527777,
+        "actual_share": 0.093,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 8,
+        "player": "Manu Gin\u00f3bili",
+        "team": "SAS",
+        "score": 0.10990786790529462,
+        "actual_share": 0.017,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 9,
+        "player": "Pau Gasol",
+        "team": "LAL",
+        "score": 0.10863713705604298,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Chris Paul",
+        "team": "NOH",
+        "score": 0.10442570286290875,
+        "actual_share": 0.002,
+        "actual_vote_rank": 13.0
+      }
+    ]
+  },
+  "2011-12": {
+    "actual_mvp": "LeBron James",
+    "predicted_mvp": "LeBron James",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.5280531248166693,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "MIA",
+        "score": 0.1842536470384189,
+        "actual_share": 0.888,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Kevin Durant",
+        "team": "OKC",
+        "score": 0.16977007835329094,
+        "actual_share": 0.735,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 3,
+        "player": "Russell Westbrook",
+        "team": "OKC",
+        "score": 0.13172245548658382,
+        "actual_share": 0.003,
+        "actual_vote_rank": 12.0
+      },
+      {
+        "rank": 4,
+        "player": "Kevin Love",
+        "team": "MIN",
+        "score": 0.12630462105899312,
+        "actual_share": 0.048,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 5,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.12400933209694534,
+        "actual_share": 0.005,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 6,
+        "player": "James Harden",
+        "team": "OKC",
+        "score": 0.11575647415345258,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 7,
+        "player": "Chris Paul",
+        "team": "LAC",
+        "score": 0.11322661321708818,
+        "actual_share": 0.318,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 8,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.10478225597310509,
+        "actual_share": 0.291,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 9,
+        "player": "Dirk Nowitzki",
+        "team": "DAL",
+        "score": 0.0979189517409493,
+        "actual_share": 0.003,
+        "actual_vote_rank": 12.0
+      },
+      {
+        "rank": 10,
+        "player": "Carmelo Anthony",
+        "team": "NYK",
+        "score": 0.0922981476989147,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2012-13": {
+    "actual_mvp": "LeBron James",
+    "predicted_mvp": "LeBron James",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.8060599359358183,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "LeBron James",
+        "team": "MIA",
+        "score": 0.20444857074133824,
+        "actual_share": 0.998,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Kevin Durant",
+        "team": "OKC",
+        "score": 0.18280203565267794,
+        "actual_share": 0.632,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 3,
+        "player": "Russell Westbrook",
+        "team": "OKC",
+        "score": 0.17210716361941872,
+        "actual_share": 0.007,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 4,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.14121413069256905,
+        "actual_share": 0.027,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 5,
+        "player": "Carmelo Anthony",
+        "team": "NYK",
+        "score": 0.1358957760641605,
+        "actual_share": 0.393,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Dwyane Wade",
+        "team": "MIA",
+        "score": 0.13063195491155313,
+        "actual_share": 0.004,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 7,
+        "player": "Kobe Bryant",
+        "team": "LAL",
+        "score": 0.12739442665381667,
+        "actual_share": 0.152,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 8,
+        "player": "Tony Parker",
+        "team": "SAS",
+        "score": 0.1252999120087651,
+        "actual_share": 0.071,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 9,
+        "player": "Tim Duncan",
+        "team": "SAS",
+        "score": 0.11587895177410837,
+        "actual_share": 0.054,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 10,
+        "player": "Chris Paul",
+        "team": "LAC",
+        "score": 0.10456678739450774,
+        "actual_share": 0.239,
+        "actual_vote_rank": 4.0
+      }
+    ]
+  },
+  "2013-14": {
+    "actual_mvp": "Kevin Durant",
+    "predicted_mvp": "Kevin Durant",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.6658492974390197,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Kevin Durant",
+        "team": "OKC",
+        "score": 0.2253075318348947,
+        "actual_share": 0.986,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "LeBron James",
+        "team": "MIA",
+        "score": 0.16287217786162395,
+        "actual_share": 0.713,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 3,
+        "player": "Blake Griffin",
+        "team": "LAC",
+        "score": 0.14756818004816405,
+        "actual_share": 0.347,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 4,
+        "player": "Kevin Love",
+        "team": "MIN",
+        "score": 0.14573134137857452,
+        "actual_share": 0.02,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 5,
+        "player": "Russell Westbrook",
+        "team": "OKC",
+        "score": 0.14255718249401392,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 6,
+        "player": "Chris Paul",
+        "team": "LAC",
+        "score": 0.13784521567097716,
+        "actual_share": 0.036,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 7,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.1365804471331832,
+        "actual_share": 0.053,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 8,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.12363115221995201,
+        "actual_share": 0.068,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 9,
+        "player": "Carmelo Anthony",
+        "team": "NYK",
+        "score": 0.11560206164995133,
+        "actual_share": 0.003,
+        "actual_vote_rank": 15.0
+      },
+      {
+        "rank": 10,
+        "player": "Paul George",
+        "team": "IND",
+        "score": 0.11054682365155713,
+        "actual_share": 0.026,
+        "actual_vote_rank": 9.0
+      }
+    ]
+  },
+  "2014-15": {
+    "actual_mvp": "Stephen Curry",
+    "predicted_mvp": "James Harden",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.8924509263255099,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.19144026707348738,
+        "actual_share": 0.72,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 2,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.18464650596019536,
+        "actual_share": 0.922,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Russell Westbrook",
+        "team": "OKC",
+        "score": 0.16643797106394556,
+        "actual_share": 0.271,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 4,
+        "player": "Chris Paul",
+        "team": "LAC",
+        "score": 0.14249112636075253,
+        "actual_share": 0.095,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 5,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.12881978023468726,
+        "actual_share": 0.425,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 6,
+        "player": "Anthony Davis",
+        "team": "NOP",
+        "score": 0.12690519291574323,
+        "actual_share": 0.156,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 7,
+        "player": "Blake Griffin",
+        "team": "LAC",
+        "score": 0.1160845209521751,
+        "actual_share": 0.002,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 8,
+        "player": "Klay Thompson",
+        "team": "GSW",
+        "score": 0.10000028367687329,
+        "actual_share": 0.001,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 9,
+        "player": "Damian Lillard",
+        "team": "POR",
+        "score": 0.09719106808040763,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "DeMarcus Cousins",
+        "team": "SAC",
+        "score": 0.09170611818342675,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2015-16": {
+    "actual_mvp": "Stephen Curry",
+    "predicted_mvp": "Stephen Curry",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.6121212121212121,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.20512968654188785,
+        "actual_share": 1.0,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.15917022534653252,
+        "actual_share": 0.482,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 3,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.14720606490042915,
+        "actual_share": 0.007,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 4,
+        "player": "Russell Westbrook",
+        "team": "OKC",
+        "score": 0.14572568510434286,
+        "actual_share": 0.371,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 5,
+        "player": "Kevin Durant",
+        "team": "OKC",
+        "score": 0.1433665757863245,
+        "actual_share": 0.112,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 6,
+        "player": "Kawhi Leonard",
+        "team": "SAS",
+        "score": 0.13901689409704354,
+        "actual_share": 0.484,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 7,
+        "player": "Chris Paul",
+        "team": "LAC",
+        "score": 0.11205542010738322,
+        "actual_share": 0.082,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 8,
+        "player": "LaMarcus Aldridge",
+        "team": "SAS",
+        "score": 0.10920841475968011,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "DeMarcus Cousins",
+        "team": "SAC",
+        "score": 0.10867334358045952,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Paul George",
+        "team": "IND",
+        "score": 0.0987735230641718,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2016-17": {
+    "actual_mvp": "Russell Westbrook",
+    "predicted_mvp": "James Harden",
+    "correct": false,
+    "actual_rank_in_model": 3.0,
+    "spearman_vote_share": 0.671239874516518,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.19196019145667348,
+        "actual_share": 0.746,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 2,
+        "player": "Kawhi Leonard",
+        "team": "SAS",
+        "score": 0.17430281732013664,
+        "actual_share": 0.495,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 3,
+        "player": "Russell Westbrook",
+        "team": "OKC",
+        "score": 0.1575324058994057,
+        "actual_share": 0.879,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 4,
+        "player": "Kevin Durant",
+        "team": "GSW",
+        "score": 0.1503906561014057,
+        "actual_share": 0.002,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 5,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.14708229213839882,
+        "actual_share": 0.051,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 6,
+        "player": "Isaiah Thomas",
+        "team": "BOS",
+        "score": 0.12353411496476364,
+        "actual_share": 0.08,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 7,
+        "player": "Jimmy Butler",
+        "team": "CHI",
+        "score": 0.11814546927170501,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.1141908030994625,
+        "actual_share": 0.33,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 9,
+        "player": "Anthony Davis",
+        "team": "NOP",
+        "score": 0.10570239000761733,
+        "actual_share": 0.002,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 10,
+        "player": "Chris Paul",
+        "team": "LAC",
+        "score": 0.10522459902864284,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2017-18": {
+    "actual_mvp": "James Harden",
+    "predicted_mvp": "James Harden",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.67125235441449,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.22699481494502727,
+        "actual_share": 0.955,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.15188932293350624,
+        "actual_share": 0.005,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 3,
+        "player": "LeBron James",
+        "team": "CLE",
+        "score": 0.14066556363481122,
+        "actual_share": 0.731,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 4,
+        "player": "Russell Westbrook",
+        "team": "OKC",
+        "score": 0.1324671930529841,
+        "actual_share": 0.075,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 5,
+        "player": "Kevin Durant",
+        "team": "GSW",
+        "score": 0.1322136169591971,
+        "actual_share": 0.065,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 6,
+        "player": "Damian Lillard",
+        "team": "POR",
+        "score": 0.12558231086729119,
+        "actual_share": 0.205,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 7,
+        "player": "Chris Paul",
+        "team": "HOU",
+        "score": 0.12022946645660369,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.11847042675457654,
+        "actual_share": 0.074,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 9,
+        "player": "Anthony Davis",
+        "team": "NOP",
+        "score": 0.11528124736029202,
+        "actual_share": 0.441,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 10,
+        "player": "Kyrie Irving",
+        "team": "BOS",
+        "score": 0.10170459084632497,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2018-19": {
+    "actual_mvp": "Giannis Antetokounmpo",
+    "predicted_mvp": "James Harden",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.62697118916282,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.20282657897481443,
+        "actual_share": 0.768,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 2,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.18344634652292852,
+        "actual_share": 0.932,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Kawhi Leonard",
+        "team": "TOR",
+        "score": 0.12718978945468928,
+        "actual_share": 0.013,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 4,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.12580558377936676,
+        "actual_share": 0.173,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 5,
+        "player": "Kevin Durant",
+        "team": "GSW",
+        "score": 0.12532240638326408,
+        "actual_share": 0.025,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 6,
+        "player": "Joel Embiid",
+        "team": "PHI",
+        "score": 0.1153802965727075,
+        "actual_share": 0.049,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 7,
+        "player": "Damian Lillard",
+        "team": "POR",
+        "score": 0.11293972221525238,
+        "actual_share": 0.068,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 8,
+        "player": "Anthony Davis",
+        "team": "NOP",
+        "score": 0.11281300536826161,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Paul George",
+        "team": "OKC",
+        "score": 0.10999076411810466,
+        "actual_share": 0.352,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 10,
+        "player": "Nikola Joki\u0107",
+        "team": "DEN",
+        "score": 0.10219882029441771,
+        "actual_share": 0.21,
+        "actual_vote_rank": 4.0
+      }
+    ]
+  },
+  "2019-20": {
+    "actual_mvp": "Giannis Antetokounmpo",
+    "predicted_mvp": "Giannis Antetokounmpo",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.8041958041958043,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.21929709244689316,
+        "actual_share": 0.952,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "James Harden",
+        "team": "HOU",
+        "score": 0.19235194335251188,
+        "actual_share": 0.363,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 3,
+        "player": "Anthony Davis",
+        "team": "LAL",
+        "score": 0.14963681247888108,
+        "actual_share": 0.081,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 4,
+        "player": "LeBron James",
+        "team": "LAL",
+        "score": 0.13254031677815953,
+        "actual_share": 0.746,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 5,
+        "player": "Damian Lillard",
+        "team": "POR",
+        "score": 0.12154918487722229,
+        "actual_share": 0.023,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 6,
+        "player": "Luka Don\u010di\u0107",
+        "team": "DAL",
+        "score": 0.11842333862342577,
+        "actual_share": 0.198,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 7,
+        "player": "Kawhi Leonard",
+        "team": "LAC",
+        "score": 0.11751403814093572,
+        "actual_share": 0.166,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 8,
+        "player": "Khris Middleton",
+        "team": "MIL",
+        "score": 0.09369575484294292,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Jimmy Butler",
+        "team": "MIA",
+        "score": 0.08428551429111122,
+        "actual_share": 0.009,
+        "actual_vote_rank": 11.0
+      },
+      {
+        "rank": 10,
+        "player": "Nikola Joki\u0107",
+        "team": "DEN",
+        "score": 0.08346342001453366,
+        "actual_share": 0.018,
+        "actual_vote_rank": 9.0
+      }
+    ]
+  },
+  "2020-21": {
+    "actual_mvp": "Nikola Jokic",
+    "predicted_mvp": "Joel Embiid",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.7812937239906358,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Joel Embiid",
+        "team": "PHI",
+        "score": 0.17967708338687574,
+        "actual_share": 0.58,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 2,
+        "player": "Nikola Joki\u0107",
+        "team": "DEN",
+        "score": 0.14299885612718938,
+        "actual_share": 0.961,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Luka Don\u010di\u0107",
+        "team": "DAL",
+        "score": 0.14088057390936554,
+        "actual_share": 0.042,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 4,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.13843050683075764,
+        "actual_share": 0.449,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 5,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.1358590268737148,
+        "actual_share": 0.345,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 6,
+        "player": "Damian Lillard",
+        "team": "POR",
+        "score": 0.12376716338730147,
+        "actual_share": 0.038,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 7,
+        "player": "Donovan Mitchell",
+        "team": "UTA",
+        "score": 0.11118677761481274,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Jimmy Butler",
+        "team": "MIA",
+        "score": 0.1071592464232672,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Rudy Gobert",
+        "team": "UTA",
+        "score": 0.10386293315520001,
+        "actual_share": 0.008,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 10,
+        "player": "Kawhi Leonard",
+        "team": "LAC",
+        "score": 0.09960052979006793,
+        "actual_share": 0.001,
+        "actual_vote_rank": 13.0
+      }
+    ]
+  },
+  "2021-22": {
+    "actual_mvp": "Nikola Jokic",
+    "predicted_mvp": "Giannis Antetokounmpo",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.8521338063968386,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.176969402238018,
+        "actual_share": 0.595,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 2,
+        "player": "Nikola Joki\u0107",
+        "team": "DEN",
+        "score": 0.17280941504034958,
+        "actual_share": 0.875,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Joel Embiid",
+        "team": "PHI",
+        "score": 0.16692097611541448,
+        "actual_share": 0.706,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 4,
+        "player": "Luka Don\u010di\u0107",
+        "team": "DAL",
+        "score": 0.1331146113342891,
+        "actual_share": 0.146,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 5,
+        "player": "Jimmy Butler",
+        "team": "MIA",
+        "score": 0.12431523725631907,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 6,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.12412967233575048,
+        "actual_share": 0.004,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 7,
+        "player": "Trae Young",
+        "team": "ATL",
+        "score": 0.11607058821785629,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Jayson Tatum",
+        "team": "BOS",
+        "score": 0.11167383933006922,
+        "actual_share": 0.043,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 9,
+        "player": "Ja Morant",
+        "team": "MEM",
+        "score": 0.10400407627617225,
+        "actual_share": 0.01,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 10,
+        "player": "Devin Booker",
+        "team": "PHO",
+        "score": 0.10340257414736395,
+        "actual_share": 0.216,
+        "actual_vote_rank": 4.0
+      }
+    ]
+  },
+  "2022-23": {
+    "actual_mvp": "Joel Embiid",
+    "predicted_mvp": "Joel Embiid",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.8198082033422869,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Joel Embiid",
+        "team": "PHI",
+        "score": 0.18879065069055884,
+        "actual_share": 0.915,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.1703780958850728,
+        "actual_share": 0.606,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 3,
+        "player": "Luka Don\u010di\u0107",
+        "team": "DAL",
+        "score": 0.16008729871945365,
+        "actual_share": 0.01,
+        "actual_vote_rank": 8.0
+      },
+      {
+        "rank": 4,
+        "player": "Nikola Joki\u0107",
+        "team": "DEN",
+        "score": 0.14718619680329909,
+        "actual_share": 0.674,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 5,
+        "player": "Shai Gilgeous-Alexander",
+        "team": "OKC",
+        "score": 0.1459626795383477,
+        "actual_share": 0.046,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 6,
+        "player": "Damian Lillard",
+        "team": "POR",
+        "score": 0.13650848308025473,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 7,
+        "player": "Jayson Tatum",
+        "team": "BOS",
+        "score": 0.1351150039231823,
+        "actual_share": 0.28,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 8,
+        "player": "Jimmy Butler",
+        "team": "MIA",
+        "score": 0.12399371500802635,
+        "actual_share": 0.003,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 9,
+        "player": "Anthony Davis",
+        "team": "LAL",
+        "score": 0.11120280770492405,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 10,
+        "player": "Donovan Mitchell",
+        "team": "CLE",
+        "score": 0.09961509221892415,
+        "actual_share": 0.03,
+        "actual_vote_rank": 6.0
+      }
+    ]
+  },
+  "2023-24": {
+    "actual_mvp": "Nikola Jokic",
+    "predicted_mvp": "Shai Gilgeous-Alexander",
+    "correct": false,
+    "actual_rank_in_model": 2.0,
+    "spearman_vote_share": 0.9833333333333333,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Shai Gilgeous-Alexander",
+        "team": "OKC",
+        "score": 0.19781732729601018,
+        "actual_share": 0.646,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 2,
+        "player": "Nikola Joki\u0107",
+        "team": "DEN",
+        "score": 0.18145460944039843,
+        "actual_share": 0.935,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 3,
+        "player": "Luka Don\u010di\u0107",
+        "team": "DAL",
+        "score": 0.18106577048058403,
+        "actual_share": 0.572,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 4,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.1699113590395802,
+        "actual_share": 0.194,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 5,
+        "player": "Jalen Brunson",
+        "team": "NYK",
+        "score": 0.1218691347327455,
+        "actual_share": 0.143,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 6,
+        "player": "Jayson Tatum",
+        "team": "BOS",
+        "score": 0.12080961718043315,
+        "actual_share": 0.087,
+        "actual_vote_rank": 6.0
+      },
+      {
+        "rank": 7,
+        "player": "Kristaps Porzi\u0146\u0123is",
+        "team": "BOS",
+        "score": 0.09723406044759186,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 8,
+        "player": "Anthony Davis",
+        "team": "LAL",
+        "score": 0.09587696640650956,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 9,
+        "player": "Anthony Edwards",
+        "team": "MIN",
+        "score": 0.09108975315259499,
+        "actual_share": 0.018,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 10,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.08955700933032397,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  },
+  "2024-25": {
+    "actual_mvp": "Shai Gilgeous-Alexander",
+    "predicted_mvp": "Shai Gilgeous-Alexander",
+    "correct": true,
+    "actual_rank_in_model": 1.0,
+    "spearman_vote_share": 0.8219014459835725,
+    "top10": [
+      {
+        "rank": 1,
+        "player": "Shai Gilgeous-Alexander",
+        "team": "OKC",
+        "score": 0.21178288660603287,
+        "actual_share": 0.913,
+        "actual_vote_rank": 1.0
+      },
+      {
+        "rank": 2,
+        "player": "Giannis Antetokounmpo",
+        "team": "MIL",
+        "score": 0.16467232049479005,
+        "actual_share": 0.47,
+        "actual_vote_rank": 3.0
+      },
+      {
+        "rank": 3,
+        "player": "Nikola Joki\u0107",
+        "team": "DEN",
+        "score": 0.13661747246017153,
+        "actual_share": 0.787,
+        "actual_vote_rank": 2.0
+      },
+      {
+        "rank": 4,
+        "player": "Jayson Tatum",
+        "team": "BOS",
+        "score": 0.13573749611299768,
+        "actual_share": 0.311,
+        "actual_vote_rank": 4.0
+      },
+      {
+        "rank": 5,
+        "player": "Donovan Mitchell",
+        "team": "CLE",
+        "score": 0.10631460829520162,
+        "actual_share": 0.074,
+        "actual_vote_rank": 5.0
+      },
+      {
+        "rank": 6,
+        "player": "Jarrett Allen",
+        "team": "CLE",
+        "score": 0.10156008811371771,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      },
+      {
+        "rank": 7,
+        "player": "Anthony Edwards",
+        "team": "MIN",
+        "score": 0.09281581243509333,
+        "actual_share": 0.012,
+        "actual_vote_rank": 7.0
+      },
+      {
+        "rank": 8,
+        "player": "Stephen Curry",
+        "team": "GSW",
+        "score": 0.09002377828513106,
+        "actual_share": 0.002,
+        "actual_vote_rank": 9.0
+      },
+      {
+        "rank": 9,
+        "player": "Evan Mobley",
+        "team": "CLE",
+        "score": 0.08849350784528037,
+        "actual_share": 0.001,
+        "actual_vote_rank": 10.0
+      },
+      {
+        "rank": 10,
+        "player": "LaMelo Ball",
+        "team": "CHO",
+        "score": 0.08690750149055029,
+        "actual_share": 0.0,
+        "actual_vote_rank": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "variant": "logtop",
+  "use_within_season_ranks": true,
+  "rank_transform": "logtop",
+  "model_type": "Ridge",
+  "target": "mvp_share",
+  "feature_cols": [
+    "top_team_3",
+    "ppg",
+    "bpm",
+    "ws",
+    "vorp",
+    "obpm",
+    "per",
+    "ows",
+    "ws_per_48",
+    "usg_pct",
+    "team_win_rank",
+    "team_wins",
+    "bpm_change"
+  ],
+  "alpha": 1.0
+}

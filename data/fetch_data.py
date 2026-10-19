@@ -15,6 +15,8 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
+from season_utils import current_season
+
 # Browser-like User-Agent to reduce 403/429 from Basketball Reference
 BR_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
 
@@ -40,6 +42,9 @@ def _fetch_br_html(url: str, max_retries: int = 4) -> str | None:
                 time.sleep(wait)
                 continue
             r.raise_for_status()
+            # BR serves UTF-8 but omits the charset header, so requests falls back to latin-1
+            # and mangles accented names (Jokić -> JokiÄ\x87).
+            r.encoding = "utf-8"
             return r.text
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
@@ -124,6 +129,133 @@ def fetch_mvp_history() -> pd.DataFrame:
         df = df[df["Lg"] == "NBA"].copy()
     df["season"] = df["season"].astype(str)
     return df
+
+
+def _find_br_table(html: str, table_id: str):
+    """Return the BeautifulSoup <table id=table_id>, also searching inside HTML comments (BR hides some tables)."""
+    from bs4 import Comment
+    soup = BeautifulSoup(html, "lxml")
+    table = soup.find("table", id=table_id)
+    if table is not None:
+        return table
+    for comment in soup.find_all(string=lambda t: isinstance(t, Comment)):
+        if f'id="{table_id}"' in comment:
+            table = BeautifulSoup(comment, "lxml").find("table", id=table_id)
+            if table is not None:
+                return table
+    return None
+
+
+MVP_VOTING_COLUMNS = ["season", "player", "team", "share", "rank", "player_id"]
+
+
+def fetch_mvp_voting_br(season: str) -> pd.DataFrame:
+    """
+    Scrape MVP voting for one season ("2023-24") from BR awards_YYYY.html (table id "mvp").
+    Returns MVP_VOTING_COLUMNS; rank is the integer voting place (ties like "5T" -> 5).
+    """
+    year_end = int(str(season).split("-")[0]) + 1
+    url = f"https://www.basketball-reference.com/awards/awards_{year_end}.html"
+    html = _fetch_br_html(url)
+    if not html:
+        return pd.DataFrame(columns=MVP_VOTING_COLUMNS)
+    table = _find_br_table(html, "mvp")
+    if table is None or table.find("tbody") is None:
+        return pd.DataFrame(columns=MVP_VOTING_COLUMNS)
+    rows = []
+    for tr in table.find("tbody").find_all("tr"):
+        if "thead" in (tr.get("class") or []):
+            continue
+        cells = {c.get("data-stat"): c for c in tr.find_all(["th", "td"])}
+        if "player" not in cells or "award_share" not in cells:
+            continue
+        rank_txt = cells["rank"].get_text(strip=True).rstrip("T") if "rank" in cells else ""
+        rows.append({
+            "season": season,
+            "player": cells["player"].get_text(strip=True),
+            "team": cells["team_id"].get_text(strip=True) if "team_id" in cells else "",
+            "share": pd.to_numeric(cells["award_share"].get_text(strip=True), errors="coerce"),
+            "rank": pd.to_numeric(rank_txt, errors="coerce"),
+            "player_id": cells["player"].get("data-append-csv", ""),
+        })
+    return pd.DataFrame(rows, columns=MVP_VOTING_COLUMNS)
+
+
+def _fetch_mvp_voting_external(start_year: int, end_year: int) -> pd.DataFrame:
+    """Fallback: MVP award shares from the GitHub dataset derived from BR."""
+    awards = _load_external_csv(EXTERNAL_AWARD_SHARES_URL)
+    awards = awards[awards["award"].astype(str).str.lower() == "nba mvp"].copy()
+    awards["season"] = pd.to_numeric(awards["season"], errors="coerce")
+    awards = awards[(awards["season"] >= start_year + 1) & (awards["season"] <= end_year)]
+    out = pd.DataFrame({
+        "season": awards["season"].astype(int).apply(_external_year_end_to_season_str),
+        "player": awards["player"],
+        "team": awards["tm"],
+        "share": pd.to_numeric(awards["share"], errors="coerce"),
+        "player_id": awards["player_id"],
+    })
+    out["rank"] = out.groupby("season")["share"].rank(method="min", ascending=False).astype(int)
+    return out[MVP_VOTING_COLUMNS]
+
+
+def build_mvp_voting_dataset(
+    start_year: int = 1995,
+    end_year: int = 2025,
+    cache_path: str | None = None,
+    use_cache: bool = True,
+) -> pd.DataFrame:
+    """
+    MVP voting (award share + voting rank) for seasons start_year-(start_year+1) .. (end_year-1)-end_year.
+    Scrapes BR awards pages politely (one request per season); falls back to the external dataset.
+    Cached to data/mvp_voting_{start_year+1}_{end_year}.csv by default.
+    """
+    import os
+    if cache_path is None:
+        cache_path = os.path.join(os.path.dirname(__file__), f"mvp_voting_{start_year + 1}_{end_year}.csv")
+    if use_cache and os.path.isfile(cache_path):
+        return pd.read_csv(cache_path)
+    frames = []
+    for season in get_season_list(start_year=start_year, end_year=end_year):
+        part = fetch_mvp_voting_br(season)
+        if part.empty:
+            print(f"  MVP voting unavailable from BR for {season}")
+        else:
+            frames.append(part)
+        _br_delay()
+    voting = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=MVP_VOTING_COLUMNS)
+    expected = len(get_season_list(start_year=start_year, end_year=end_year))
+    if voting["season"].nunique() < expected:
+        print("BR MVP voting incomplete; using external award-share dataset.")
+        voting = _fetch_mvp_voting_external(start_year, end_year)
+    voting.to_csv(cache_path, index=False)
+    print(f"Saved MVP voting ({len(voting)} rows) to {cache_path}")
+    return voting
+
+
+def merge_mvp_voting(df: pd.DataFrame, voting: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add mvp_share (0 for non-receivers) and mvp_vote_rank (NaN for non-receivers) to player-seasons.
+    Matches on season + player_id when available, else season + accent-insensitive normalized name.
+    """
+    out = df.copy()
+    v = voting.copy()
+    v["_pclean"] = v["player"].apply(_normalize_player_name).str.lower()
+    out["_pclean"] = out["player"].apply(_normalize_player_name).str.lower()
+    out["mvp_share"] = float("nan")
+    out["mvp_vote_rank"] = float("nan")
+    if "player_id" in out.columns and "player_id" in v.columns:
+        by_id = v.dropna(subset=["player_id"]).set_index(["season", "player_id"])
+        idx = pd.MultiIndex.from_frame(out[["season", "player_id"]].astype(str))
+        out["mvp_share"] = by_id["share"].reindex(idx).to_numpy()
+        out["mvp_vote_rank"] = by_id["rank"].reindex(idx).to_numpy()
+    missing = out["mvp_share"].isna()
+    if missing.any():
+        by_name = v.drop_duplicates(["season", "_pclean"]).set_index(["season", "_pclean"])
+        idx = pd.MultiIndex.from_frame(out.loc[missing, ["season", "_pclean"]])
+        out.loc[missing, "mvp_share"] = by_name["share"].reindex(idx).to_numpy()
+        out.loc[missing, "mvp_vote_rank"] = by_name["rank"].reindex(idx).to_numpy()
+    out["mvp_share"] = out["mvp_share"].fillna(0.0)
+    return out.drop(columns=["_pclean"])
 
 
 def fetch_player_stats_nba_api(season: str) -> pd.DataFrame:
@@ -340,6 +472,84 @@ ADVANCED_STAT_COLUMNS = [
 REGULAR_AND_WINS_COLUMNS = ["ppg", "rpg", "apg", "team_wins", "team_win_rank", "top_team_3", "games"]
 # Full feature set: advanced + regular + wins + rank.
 FULL_FEATURE_COLUMNS = ADVANCED_STAT_COLUMNS + REGULAR_AND_WINS_COLUMNS
+# Year-over-year improvement features: "<stat>_change" = this season minus the player's previous season.
+YOY_FEATURE_SOURCES = ["bpm"]
+YOY_FEATURE_COLUMNS = [f"{c}_change" for c in YOY_FEATURE_SOURCES]
+# Combined/traded-player rows have no single team record.
+MULTI_TEAM_ABBRS = {"TOT", "2TM", "3TM", "4TM", "5TM"}
+
+
+def add_team_rank(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    (Re)compute team_win_rank (1 = most wins among *teams* that season, ties share the best rank)
+    and top_team_3 (team_win_rank <= 3) from team_wins. Multi-team rows get NaN rank and top_team_3 = 0.
+    """
+    out = df.drop(columns=["team_win_rank", "top_team_3"], errors="ignore")
+    if "team_wins" not in out.columns or "team_abbr" not in out.columns:
+        return out
+    out["team_wins"] = pd.to_numeric(out["team_wins"], errors="coerce")
+    teams = (
+        out.loc[~out["team_abbr"].isin(MULTI_TEAM_ABBRS), ["season", "team_abbr", "team_wins"]]
+        .dropna()
+        .drop_duplicates(subset=["season", "team_abbr"])
+    )
+    teams["team_win_rank"] = teams.groupby("season")["team_wins"].rank(method="min", ascending=False)
+    out = out.merge(teams[["season", "team_abbr", "team_win_rank"]], on=["season", "team_abbr"], how="left")
+    out["top_team_3"] = (out["team_win_rank"] <= 3).astype(int)
+    return out
+
+
+def _prev_season(season: str) -> str:
+    """'2024-25' -> '2023-24'."""
+    y = int(str(season).split("-")[0])
+    return f"{y - 1}-{str(y)[-2:]}"
+
+
+def add_yoy_features(df: pd.DataFrame, history: pd.DataFrame | None = None) -> pd.DataFrame:
+    """
+    Add YOY_FEATURE_COLUMNS (e.g. bpm_change) = stat this season minus the same player's stat in the
+    immediately preceding season, looked up in df itself plus optional `history`. Players without a
+    qualifying previous season get 0. Matches on player_id when available, else normalized name.
+    """
+    out = df.copy()
+    prior = pd.concat([history, df], ignore_index=True) if history is not None and not history.empty else df
+    use_id = (
+        "player_id" in out.columns and "player_id" in prior.columns
+        and out["player_id"].notna().all() and prior["player_id"].notna().all()
+    )
+    key = "player_id" if use_id else "_pkey"
+    if not use_id:
+        out["_pkey"] = out["player"].apply(_normalize_player_name).str.lower()
+        prior = prior.assign(_pkey=prior["player"].apply(_normalize_player_name).str.lower())
+    out["_prev_season"] = out["season"].apply(_prev_season)
+    for stat in YOY_FEATURE_SOURCES:
+        if stat not in out.columns or stat not in prior.columns:
+            continue
+        p = prior[["season", key, stat]].copy()
+        p[stat] = pd.to_numeric(p[stat], errors="coerce")
+        p = p.dropna().drop_duplicates(subset=["season", key])
+        p = p.rename(columns={"season": "_prev_season", stat: "_prev_val"})
+        out = out.merge(p, on=["_prev_season", key], how="left")
+        out[f"{stat}_change"] = (pd.to_numeric(out[stat], errors="coerce") - out["_prev_val"]).fillna(0.0)
+        out = out.drop(columns=["_prev_val"])
+    return out.drop(columns=["_prev_season", "_pkey"], errors="ignore")
+
+
+def _load_prior_season_stats(season: str, min_games: int = 41) -> pd.DataFrame:
+    """Previous season's player stats for YoY features: from the cached historical CSVs if present, else BR."""
+    import glob
+    import os
+    prev = _prev_season(season)
+    for path in sorted(glob.glob(os.path.join(os.path.dirname(__file__), "historical_advanced*.csv"))):
+        cached = pd.read_csv(path)
+        cached = cached[cached["season"] == prev]
+        if not cached.empty:
+            return cached
+    prior = fetch_advanced_stats_br(prev)
+    if prior.empty:
+        return prior
+    prior["games"] = pd.to_numeric(prior.get("games"), errors="coerce")
+    return prior[prior["games"].fillna(0) >= min_games].copy()
 
 
 # ----------------------------
@@ -478,13 +688,7 @@ def build_historical_dataset_external(
     teams = teams[["season", "team_abbr", "team_wins"]].copy()
     player_df = player_df.merge(teams, on=["season", "team_abbr"], how="left")
 
-    # Compute team_win_rank and top_team_3 within each season.
-    player_df["team_win_rank"] = (
-        player_df.groupby("season")["team_wins"]
-        .rank(method="min", ascending=False)
-        .astype("Int64")
-    )
-    player_df["top_team_3"] = (player_df["team_win_rank"] <= 3).fillna(False).astype(int)
+    player_df = add_team_rank(player_df)
 
     # --- MVP labels ---
     awards = awards[awards["winner"] == True].copy()
@@ -510,10 +714,11 @@ def build_historical_dataset_external(
 
 
 def fetch_current_season_advanced_external(
-    season: str = "2025-26",
+    season: str | None = None,
     min_games: int = 20,
 ) -> pd.DataFrame:
     """Fetch current season advanced+per-game+team_wins using external CSVs."""
+    season = season or current_season()
     year_end = _season_str_to_external_year_end(season)
 
     adv = _load_external_csv(EXTERNAL_ADVANCED_URL)
@@ -581,13 +786,9 @@ def fetch_current_season_advanced_external(
     teams = teams[["team_abbr", "team_wins"]].copy()
     player_df = player_df.merge(teams, on=["team_abbr"], how="left")
 
-    player_df["team_win_rank"] = (
-        player_df["team_wins"].rank(method="min", ascending=False).astype("Int64")
-    )
-    player_df["top_team_3"] = (player_df["team_win_rank"] <= 3).fillna(False).astype(int)
-
     player_df["player_clean"] = player_df["player"].apply(_normalize_player_name)
     player_df["season"] = _external_year_end_to_season_str(year_end)
+    player_df = add_team_rank(player_df)
 
     cols_needed = set(FULL_FEATURE_COLUMNS) | {"season", "player", "player_id", "player_clean", "team_abbr"}
     keep_cols = [c for c in player_df.columns if c in cols_needed]
@@ -754,15 +955,7 @@ def build_advanced_historical_dataset(
     player_df = pd.concat(all_dfs, ignore_index=True)
 
     # Team wins rank (1 = most wins in league that season). MVP voters strongly favor top-3 seeds.
-    if "team_wins" in player_df.columns:
-        rank_df = (
-            player_df[["season", "team_abbr", "team_wins"]]
-            .drop_duplicates()
-            .sort_values(["season", "team_wins"], ascending=[True, False])
-        )
-        rank_df["team_win_rank"] = rank_df.groupby("season")["team_wins"].rank(method="min", ascending=False).astype(int)
-        player_df = player_df.merge(rank_df[["season", "team_abbr", "team_win_rank"]], on=["season", "team_abbr"], how="left")
-        player_df["top_team_3"] = (player_df["team_win_rank"] <= 3).astype(int)
+    player_df = add_team_rank(player_df)
 
     for col in ADVANCED_STAT_COLUMNS:
         if col in player_df.columns:
@@ -785,12 +978,14 @@ def build_advanced_historical_dataset(
     return player_df
 
 
-def fetch_current_season_advanced(season: str = "2025-26", min_games: int = 20) -> pd.DataFrame:
+def fetch_current_season_advanced(season: str | None = None, min_games: int = 20) -> pd.DataFrame:
     """Fetch advanced + per-game stats + team wins for current season (same formula as historical)."""
+    season = season or current_season()
     df = fetch_advanced_stats_br(season)
     if df.empty:
         # Basketball-Reference is blocked here; use the external dataset instead.
-        return fetch_current_season_advanced_external(season=season, min_games=min_games)
+        df = fetch_current_season_advanced_external(season=season, min_games=min_games)
+        return add_yoy_features(df, _load_prior_season_stats(season)) if not df.empty else df
     if "games" in df.columns:
         df["games"] = pd.to_numeric(df["games"], errors="coerce")
         df = df[df["games"].fillna(0) >= min_games].copy()
@@ -807,12 +1002,8 @@ def fetch_current_season_advanced(season: str = "2025-26", min_games: int = 20) 
     if not standings.empty and "team_abbr" in df.columns:
         df = df.merge(standings, on=["team_abbr", "season"], how="left")
         # Team wins rank and top-3 flag (MVP almost always from top-3 team)
-        if "team_wins" in df.columns:
-            rank_df = df[["season", "team_abbr", "team_wins"]].drop_duplicates().sort_values("team_wins", ascending=False)
-            rank_df["team_win_rank"] = rank_df["team_wins"].rank(method="min", ascending=False).astype(int)
-            df = df.merge(rank_df[["season", "team_abbr", "team_win_rank"]], on=["season", "team_abbr"], how="left")
-            df["top_team_3"] = (df["team_win_rank"] <= 3).astype(int)
+        df = add_team_rank(df)
     for col in ADVANCED_STAT_COLUMNS + REGULAR_AND_WINS_COLUMNS:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
-    return df
+    return add_yoy_features(df, _load_prior_season_stats(season))

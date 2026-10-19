@@ -1,0 +1,6 @@
+MVP formula (ensemble):
+  score = z(P_logistic) + z(share_ridge) + z(raw VORP)
+Each term is standardized within the season being scored (mean 0, std 1),
+then added. Logistic and Ridge use the same within-season percentile-ranked
+feature set as the logistic / pct variants; VORP is the raw Basketball Reference value.
+Highest ensemble score in a season = predicted MVP.

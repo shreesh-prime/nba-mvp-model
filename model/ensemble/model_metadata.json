@@ -1,0 +1,22 @@
+{
+  "variant": "ensemble",
+  "use_within_season_ranks": true,
+  "rank_transform": "pct",
+  "model_type": "EnsembleModel",
+  "target": "mvp_share",
+  "feature_cols": [
+    "top_team_3",
+    "ppg",
+    "bpm",
+    "ws",
+    "vorp",
+    "obpm",
+    "per",
+    "ows",
+    "ws_per_48",
+    "usg_pct",
+    "team_win_rank",
+    "team_wins"
+  ],
+  "blend": "z(logistic)+z(ridge)+z(raw_vorp)"
+}

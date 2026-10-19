@@ -1,0 +1,22 @@
+MVP formula (Ridge regression on MVP award share, alpha=1.0, rank transform 'logtop'):
+  predicted_share = 0.0090 +0.0088*top_team_3 -0.0004*ppg +0.0001*bpm +0.0102*ws +0.0093*vorp -0.0013*obpm -0.0100*per -0.0036*ows +0.0198*ws_per_48 +0.0204*usg_pct -0.0021*team_win_rank -0.0021*team_wins -0.0021*bpm_change
+
+Each stat is first converted to a within-season rank (-log(pct): larger is better, top of the league spread out),
+then standardized (mean=0, std=1) across all player-seasons. top_team_3 is a 0/1 flag.
+Coefficients are in award-share units per standard deviation. Positive coefficient = helps.
+Highest predicted_share in a season = predicted MVP.
+
+Coefficients by magnitude:
+    usg_pct        +0.0204
+    ws_per_48      +0.0198
+    ws             +0.0102
+    per            -0.0100
+    vorp           +0.0093
+    top_team_3     +0.0088
+    ows            -0.0036
+    bpm_change     -0.0021
+    team_win_rank  -0.0021
+    team_wins      -0.0021
+    obpm           -0.0013
+    ppg            -0.0004
+    bpm            +0.0001

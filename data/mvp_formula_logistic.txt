@@ -1,0 +1,22 @@
+MVP formula (LogisticRegression on is_mvp, class_weight='balanced', C=0.8, rank transform 'pct'):
+  P(MVP) = 1 / (1 + exp(-z))
+  z = -39.0311 -0.0231*top_team_3 -1.1419*ppg -2.6268*bpm -2.2740*ws -1.4130*vorp -5.3408*obpm -3.1110*per -4.3224*ows -2.8612*ws_per_48 -0.5291*usg_pct -1.5324*team_win_rank -1.5324*team_wins
+
+Each stat is first converted to a within-season rank (percentile rank: rank/n, 1/n = league best (smaller is better)),
+then standardized (mean=0, std=1) across all player-seasons. top_team_3 is a 0/1 flag.
+Coefficients are in log-odds per standard deviation. For ranked stats a NEGATIVE coefficient helps (smaller pct = better rank); for top_team_3 positive helps.
+Highest P(MVP) in a season = predicted MVP.
+
+Coefficients by magnitude:
+    obpm           -5.3408
+    ows            -4.3224
+    per            -3.1110
+    ws_per_48      -2.8612
+    bpm            -2.6268
+    ws             -2.2740
+    team_win_rank  -1.5324
+    team_wins      -1.5324
+    vorp           -1.4130
+    ppg            -1.1419
+    usg_pct        -0.5291
+    top_team_3     -0.0231
