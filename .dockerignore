@@ -1,0 +1,16 @@
+.git
+.github
+.DS_Store
+**/__pycache__
+**/*.pyc
+.venv
+venv
+env
+.pytest_cache
+tests
+*.ipynb
+.ipynb_checkpoints
+Dockerfile
+.dockerignore
+render.yaml
+Procfile

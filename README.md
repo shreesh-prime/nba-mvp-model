@@ -1,185 +1,120 @@
-# NBA MVP Prediction Model
+# NBA MVP Predictor
 
-Predict the NBA MVP using **advanced stats** from Basketball Reference. The pipeline:
+[![CI](https://github.com/shreesh-prime/nba-mvp-model/actions/workflows/ci.yml/badge.svg)](https://github.com/shreesh-prime/nba-mvp-model/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-1. **Fetch historical data** – Advanced stats (PER, WS, BPM, VORP, WS/48, etc.) for each player-season.
-2. **Correlation analysis** – See which stats correlate most with winning MVP (saved to `data/mvp_feature_correlations.json` and `data/mvp_correlation_plot.png`).
-3. **Train a model** – Random Forest trained on the top correlated stats to predict MVP (binary: winner vs non-winner).
-4. **Predict this season** – Score current-season players and rank top MVP candidates.
+Predicts the NBA MVP from advanced stats and team success, backtested against every MVP race since 1995-96, with a live prediction for the current season that refreshes daily.
 
-## Setup and run
+**Live demo:** _coming soon_
 
-Run everything from the **folder that contains** `mvp_model.py`, `app.py`, and `requirements.txt` (the repo root). For example, if you have:
+![Screenshot of the app showing the 2016-17 season](docs/screenshot.png)
 
-```
-nba-model/
-  nba-mvp-model/    ← go here (this is the repo root)
-    mvp_model.py
-    app.py
-    requirements.txt
-    data/
-    ...
-```
+## How it works
 
-then:
+1. **Data.** Player-season advanced stats (PER, WS, WS/48, BPM, OBPM, VORP, usage), per-game scoring, team wins, and MVP voting results are scraped from [Basketball Reference](https://www.basketball-reference.com/) and cached in `data/`.
+2. **Peer-relative features.** Each stat is converted to a **within-season percentile rank**, because voters compare players against that year's league, not against other eras. Team success enters as team-wins rank and a top-3-seed flag.
+3. **Models.** Four models are trained and compared:
+   - **Shipped model**: logistic regression on "won MVP or not". This is the model behind the live prediction.
+   - **Logistic regression**: the same model retrained after a team-rank bug fix (see below).
+   - **Vote-share Ridge (percentile ranks)**: Ridge regression on each player's actual MVP award share.
+   - **Vote-share Ridge (log-top ranks)**: the same, but ranks are log-transformed so the gap between #1 and #5 in the league counts for more than the gap between #100 and #105.
+   - **Ensemble**: within-season z-score blend of logistic P(MVP), Ridge vote-share, and raw VORP. This is the strongest exact-winner model.
+4. **Backtest.** Leave-one-season-out: for each season, train on every other season and predict that one.
+
+## Backtest results (1995-96 to 2024-25, 30 seasons)
+
+| Model | Exact MVP | MVP in top 3 | MRR | Avg. rank of real MVP | Vote-order match |
+|---|---|---|---|---|---|
+| **Ensemble (logistic + Ridge + VORP)** | **22/30** | **27/30** | **0.830** | **1.93** | 0.690 |
+| Shipped model (logistic, pre team-rank fix) | 20/30 | 26/30 | 0.783 | 1.97 | 0.665 |
+| Logistic regression | 19/30 | 26/30 | 0.770 | 2.03 | 0.674 |
+| Vote-share Ridge (percentile ranks) | 20/30 | 24/30 | 0.743 | 4.30 | 0.505 |
+| Vote-share Ridge (log-top ranks) | 17/30 | 28/30 | 0.742 | 2.87 | 0.704 |
+
+- **MRR** (mean reciprocal rank) averages 1 / (the rank the model gave the real MVP), so 1.0 means it always ranked the winner first.
+- **Vote-order match** is the Spearman correlation between predicted scores and actual vote shares among players who received votes.
+- Full per-season results are in `data/backtest_results*.csv` and `data/backtest_summary.json`. The app's **Model** menu shows every model's pick for any past season.
+- **Why not 25/30?** The remaining ensemble misses are the seasons where voters rewarded a story the box score does not contain: Malone 1997 (fatigue after Jordan), Iverson 2001, Nash 2005–06 (Suns turnaround), Kobe 2008, Rose 2011, Curry 2015 (over Harden's WS/VORP lead), Westbrook 2017. An oracle that could pick the best of these models after seeing the answer only reaches 25 by mixing contradictory specialists; no single model, and no blend that is allowed to look only at stats, gets there. Nash 2005–06 in particular is missed by every variant.
+
+**The team-rank fix.** An earlier version ranked team wins across *player rows* instead of across teams, so a 64-win team with many rostered players could rank 14th. The fixed feature ranks teams only. The shipped model was trained before the fix; its score partly came from the broken feature, which is why the retrained logistic model scores slightly lower.
+
+### Seasons the shipped model gets wrong
+
+| Season | Actual MVP | Model's pick | Why it's hard |
+|---|---|---|---|
+| 1996-97 | Karl Malone | Michael Jordan | Voter fatigue: Jordan had stronger numbers |
+| 1997-98 | Michael Jordan | Karl Malone | The reverse of the year before |
+| 2000-01 | Allen Iverson | Shaquille O'Neal | Narrative and scoring title over efficiency |
+| 2001-02, 2002-03 | Tim Duncan | Shaquille O'Neal, Dirk Nowitzki | Close races between similar profiles |
+| 2004-05, 2005-06 | Steve Nash | Dirk Nowitzki, Chauncey Billups | Nash's value was largely team improvement, which box-score metrics underrate |
+| 2007-08 | Kobe Bryant | Kevin Garnett | Career-arc narrative |
+| 2016-17 | Russell Westbrook | Kevin Durant | The triple-double season; voters rewarded the story over team success |
+| 2021-22 | Nikola Jokić | Giannis Antetokounmpo | Very close race |
+
+## Quickstart
 
 ```bash
-cd nba-model/nba-mvp-model
+git clone https://github.com/shreesh-prime/nba-mvp-model.git
+cd nba-mvp-model
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+python3 app.py                 # web app on http://localhost:8080
 ```
 
-All commands below are run from that same folder (where the Python files live).
-
-## Run the pipeline
-
-**Full pipeline** (fetch data, backtest, formula, train, predict):
+The repo ships with cached data and trained models, so the app works immediately. To rebuild:
 
 ```bash
-python mvp_model.py
+python3 mvp_model.py                       # train + backtest all model variants
+python3 mvp_model.py backtest --variant logtop
+python3 predict_mvp.py --variant logistic  # print the current-season top 10
+python3 update_data.py                     # refresh data/current_season_prediction.json
 ```
 
-**Backtest and formula only:**
+The current season is derived from today's date (a new season starts on October 1), so nothing needs editing each year.
+
+## Development
 
 ```bash
-python mvp_model.py backtest
+pip install -r requirements-dev.txt
+ruff check .
+pytest -q
 ```
 
-**Predict current season** (after training once):
+Tests run offline (network access is blocked in `tests/conftest.py`). CI runs both on every push and pull request.
 
-```bash
-python predict_mvp.py
+## Project structure
+
+```
+app.py                 Flask app (season + model menus, backtest comparison, JSON API)
+mvp_model.py           Features, model variants, leave-one-season-out backtest, training CLI
+predict_mvp.py         Current-season prediction from a saved model
+update_data.py         Daily refresh of the current-season prediction
+season_utils.py        Current-season helpers
+data/fetch_data.py     Basketball Reference scraping (rate-limited) and dataset builders
+data/                  Cached stats, MVP voting, backtest results, formulas
+model/                 Shipped model; model/<variant>/ for each variant
+tests/                 pytest suite
+.github/workflows/     CI and the daily prediction refresh
 ```
 
-## Web app on port 8080
+## API
 
-From the folder that contains `app.py`:
+- `GET /api/<season>`: backtest result for a past season (predicted MVP, actual MVP, top 10), or the live prediction for the current season. `/api/season/<season>` is an alias.
 
-```bash
-pip install -r requirements.txt
-python3 app.py
-```
+## Deployment
 
-Then open **[http://localhost:8080](http://localhost:8080)**. You get:
+- **Render:** the repo includes `render.yaml`. In Render, choose New, then Blueprint, and pick this repo. It runs `gunicorn app:app` on the free plan.
+- **Docker:** `docker build -t nba-mvp . && docker run -p 8080:8080 nba-mvp`
+- **Daily refresh:** `.github/workflows/update-predictions.yml` runs `update_data.py` every day and commits the new prediction when it changes. Enable *Read and write* workflow permissions under Settings, then Actions, in the GitHub repo. In the offseason it skips quietly.
 
-- **Dropdown by year** — Pick a season (2000–01 through 2025–26).
-- **Historical seasons** — Shows **predicted MVP** vs **actual MVP** and whether they match.
-- **2025–26** — Shows **predicted winner** (and top 10) based on current stats; actual MVP TBD at end of season.
+## Limitations
 
-Run the pipeline once so the app has backtest and model data:
+- Voters weigh narrative, voter fatigue and availability, which box-score stats can't capture. Most misses above are of that kind.
+- Live predictions use the shipped model. Current-season predictions require 20 games played, while training uses 41.
+- Data comes from Basketball Reference. Requests are rate-limited and results are cached to respect their [terms of use](https://www.sports-reference.com/termsofuse.html). Please keep it that way if you fork this.
 
-```bash
-python3 mvp_model.py
-python3 app.py
-```
+## License
 
-## Keep 2025–26 prediction updated daily
-
-To refresh current-season stats and update the model’s prediction every day:
-
-```bash
-python3 update_data.py
-```
-
-This fetches the latest 2025–26 advanced stats from Basketball Reference and overwrites `data/current_season_prediction.json`. The app reads that file for the “2025–26” tab.
-
-**Cron example** (run every day at 6 AM):
-
-```bash
-0 6 * * * cd /path/to/nba-mvp-model && python3 update_data.py
-```
-
-Replace `/path/to/nba-mvp-model` with the folder that contains `update_data.py`.
-
-## GitHub
-
-- **Clone:** `git clone https://github.com/YOUR_USERNAME/nba-mvp-model.git && cd nba-mvp-model` (then run commands from that folder; if you put it inside another folder like `nba-model`, use `cd nba-model/nba-mvp-model`)
-- **Push changes:** `git add . && git commit -m "..." && git push`
-- **`.gitignore`** keeps data and model files out of the repo; anyone who clones can run the pipeline to regenerate them.
-
-## Usage
-
-### Full pipeline (recommended first run)
-
-Build historical data, compute correlations, train the model, and predict this year’s top 10:
-
-```bash
-python mvp_model.py
-```
-
-- **Historical data** is cached at `data/historical_advanced.csv` (so later runs are fast).
-- **Correlations** are printed, saved to `data/mvp_feature_correlations.json`, and plotted to `data/mvp_correlation_plot.png`.
-- **Model** is saved under `model/` (classifier, scaler, feature list).
-- **Top 10** for the current season (e.g. 2025-26) are printed.
-
-### Predict only (after training)
-
-After you’ve run `mvp_model.py` once, you can refresh the prediction using the latest stats without retraining:
-
-```bash
-python predict_mvp.py
-```
-
-Edit `predict_mvp.py` to change `season`, `min_games`, or `top_n` if needed.
-
-### Customization
-
-In `mvp_model.py` you can change:
-
-- **`run_full_pipeline(..., start_year=2000, end_year=2025)`** – Which seasons to use for training.
-- **`top_k_features=10`** – How many of the top-correlated stats to use in the model.
-- **`current_season="2025-26"`** – Which season to predict.
-
-In `data/fetch_data.py`:
-
-- **`build_advanced_historical_dataset(..., min_games=41)`** – Minimum games to count a player-season (41 ≈ half season).
-
-## Backtest: did the model predict past MVPs?
-
-Each run of the full pipeline **backtests** the model with **leave-one-season-out**:
-
-- For each past season (e.g. 2019–20), the model is trained on **all other seasons**, then asked to predict that season’s MVP (the player with highest MVP probability).
-- Results are compared to the **actual MVP** and written to `data/backtest_results.csv` (columns: `season`, `actual_mvp`, `predicted_mvp`, `correct`).
-- Summary: **“Model predicted correct MVP in X out of Y seasons”** is printed.
-
-To run **only** the backtest and formula (no current-season prediction):
-
-```bash
-python mvp_model.py backtest
-```
-
-## The “formula” to win MVP
-
-The script fits a **logistic regression** on the same advanced stats so you get an interpretable equation:
-
-- **P(MVP) = 1 / (1 + exp(-z))**, where **z** is a linear combination of (standardized) stats.
-- The equation is printed and saved to **`data/mvp_formula.txt`**, e.g.  
-  **z = intercept + c1*vorp + c2*bpm + c3*ws + ...**
-- **Positive coefficient** = higher that stat → higher MVP chance; **negative** = hurts.
-
-So the “formula” is: **maximize that combination of stats** (e.g. VORP, BPM, WS) subject to the weights in `mvp_formula.txt`. The Random Forest is used for the actual predictions; the logistic regression is for understanding what drives the model.
-
-## If accuracy is low
-
-If the backtest shows the model often picks the wrong MVP:
-
-- **Add team success**: merge in team wins (e.g. from standings); MVPs are usually on top seeds.
-- **Change features**: try `top_k_features=6` or `12` in `mvp_model.py`.
-- **More history**: use `start_year=1990` for more MVP examples.
-- **Try logistic regression for prediction**: in code, swap the classifier to `LogisticRegression` and re-run backtest.
-
----
-
-## Advanced stats used
-
-From Basketball Reference’s **Advanced** table:
-
-- **PER** – Player Efficiency Rating  
-- **TS%** – True Shooting  
-- **WS, WS/48** – Win Shares (total and per 48)  
-- **BPM, VORP** – Box Plus/Minus, Value over Replacement Player  
-- **OWS, DWS** – Offensive/Defensive Win Shares  
-- **USG%** – Usage  
-- **OBPM, DBPM** – Offensive/Defensive BPM  
-- Plus rate stats: **ORB%, DRB%, TRB%, AST%, STL%, BLK%, TOV%**, etc.
-
-The script **ranks these by correlation with MVP** and uses the top ones as model inputs, so the “determining factors” are data-driven from past MVP results.
+[MIT](LICENSE)

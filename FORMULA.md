@@ -1,41 +1,40 @@
-# MVP formula (according to the model)
+# The MVP "formula"
 
-The model uses two views of “how to win MVP”:
+Every model scores players with a linear combination of their stats, so each one doubles as an interpretable formula. Running `python3 mvp_model.py` writes the exact equations, with fitted coefficients, to:
 
----
+- `data/mvp_formula.txt`: shipped model
+- `data/mvp_formula_logistic.txt`, `data/mvp_formula_pct.txt`, `data/mvp_formula_logtop.txt`: the three variants
 
-## 1. Interpretable formula (logistic regression)
-
-After you run `python mvp_model.py` or `python mvp_model.py backtest`, the **exact equation** is saved to **`data/mvp_formula.txt`**. It looks like this:
-
-**Probability of being MVP:**
+## Logistic models (shipped and `logistic`)
 
 ```
 P(MVP) = 1 / (1 + exp(-z))
+z = intercept + c1*top_team_3 + c2*ppg + c3*bpm + c4*ws + ... + c12*team_wins
 ```
 
-**Score z (linear combination of standardized stats):**
+The player with the highest P(MVP) in a season is the predicted MVP.
+
+## Ensemble (`ensemble`)
 
 ```
-z = intercept + c1*vorp + c2*bpm + c3*ws + c4*ws_per_48 + c5*per + ...
+score = z(P_logistic) + z(share_ridge) + z(raw VORP)
 ```
 
-- **Features** (e.g. `vorp`, `bpm`, `ws`, `ws_per_48`, `per`) are the top correlating factors chosen from historical MVP winners.
-  - When `use_within_season_ranks` is enabled (now the default), each feature is first converted to a **within-season percentile rank** (peer-relative).
-  - The resulting rank features are then **standardized** (mean 0, std 1) before being used.
-- **Coefficients** `c1`, `c2`, ...: **positive** = higher that stat → higher MVP probability; **negative** = hurts.
-- **Intercept**: baseline when all stats are at league average.
+Each term is standardized within the season being scored, then added. This is the strongest exact-winner model (22/30 leave-one-season-out).
 
-So in words: **the formula to win MVP is to maximize z** — each coefficient tells you whether moving that (rank-normalized) feature up or down increases MVP probability (positive helps, negative hurts).
+## Vote-share Ridge models (`pct` and `logtop`)
 
----
+```
+predicted award share = intercept + c1*top_team_3 + c2*ppg + ... + c13*bpm_change
+```
 
-## 2. Which stats matter most?
+Each model is fit to the share of MVP voting points each player actually received.
 
-The **weights** (coefficients) and **order of importance** depend on your run; they’re in `data/mvp_formula.txt` and in the “Feature importance” output from the Random Forest. In practice, the model tends to weight:
+## Reading the coefficients
 
-- **Advanced & impact stats** (VARIES by run): the model may weight metrics like VORP/BPM/WS/WS/48/PER and also their rank-normalized versions.
-- **Regular box-score stats**: metrics like `ppg`/`rpg`/`apg` can matter, but the direction (positive/negative coefficient) depends on the fitted model.
-- **Team context**: `top_team_3` plus team success signals like `team_win_rank`/`team_wins` (rank-normalized like the other features in the current model).
+- Each stat is first converted to a **within-season percentile rank**, then standardized. `top_team_3` is a 0/1 flag for a top-3 team by wins.
+- With percentile ranks (`shipped`, `logistic`, `pct`), **1/n is the league's best**. A *negative* coefficient means "ranking near the top of the league helps".
+- With log-top ranks (`logtop`), larger is better, so a *positive* coefficient helps.
+- `team_wins` and `team_win_rank` carry the same information, so the models split their weight between them. Several advanced stats are strongly correlated (WS, OWS, OBPM, BPM). Read the coefficients as a group rather than one by one.
 
-The model produces an **MVP score** for every player: a weighted combination of these regular stats, impactful advanced stats, and team success. The winner is whoever has the highest score—no hard filter by team. So: **maximize the MVP score** (points + advanced impact + team success); top-3 team helps a lot but standout stats can overcome a lower seed. The exact coefficients are in `mvp_formula.txt` after you run the pipeline.
+In the logistic models, the biggest weights are on offensive impact (OBPM, OWS), PER, WS/48, BPM and team success. In short, the formula for winning MVP is to be among the league's very best in offensive impact and efficiency, on one of its best teams.
