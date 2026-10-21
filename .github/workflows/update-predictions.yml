@@ -1,0 +1,70 @@
+name: Update predictions
+
+on:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-predictions
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Fails or produces nothing in the offseason (no current-season stats yet);
+      # that should not mark the scheduled run as failed.
+      - name: Refresh current-season prediction
+        id: refresh
+        continue-on-error: true
+        run: python update_data.py
+
+      - name: Ignore timestamp-only changes
+        if: steps.refresh.outcome == 'success'
+        run: |
+          f=data/current_season_prediction.json
+          if git cat-file -e HEAD:"$f" 2>/dev/null && [ -f "$f" ]; then
+            python - "$f" <<'PY'
+          import json, subprocess, sys
+          path = sys.argv[1]
+          old = json.loads(subprocess.check_output(["git", "show", f"HEAD:{path}"]))
+          new = json.load(open(path))
+          old.pop("last_updated", None)
+          new.pop("last_updated", None)
+          if old == new:
+              subprocess.check_call(["git", "checkout", "--", path])
+              print("Prediction unchanged apart from timestamp; skipping.")
+          PY
+          fi
+
+      - name: Commit and push if changed
+        if: steps.refresh.outcome == 'success'
+        run: |
+          git add -A data/
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update current-season MVP prediction ($(date -u +%Y-%m-%d))"
+          git push
+
+      - name: Note skipped refresh
+        if: steps.refresh.outcome != 'success'
+        run: echo "::notice::update_data.py failed (likely offseason or upstream data unavailable); no changes committed."

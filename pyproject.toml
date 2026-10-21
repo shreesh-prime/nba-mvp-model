@@ -1,0 +1,32 @@
+[project]
+name = "nba-mvp-model"
+version = "0.1.0"
+description = "Predict the NBA MVP from within-season percentile-ranked advanced stats."
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B"]
+# Long HTML/f-string lines in app.py and the data scripts.
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Pre-existing modules: configured rather than reformatted. Remove entries as files get cleaned up.
+"app.py" = ["I001"]
+"mvp_model.py" = ["I001", "F401", "B905"]
+"predict_mvp.py" = ["I001"]
+"update_data.py" = ["I001", "E402", "B007"]
+# fetch_data.py patches ssl before its remaining imports.
+"data/fetch_data.py" = ["I001", "E402", "B007", "E712", "F841"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = [
+    "ignore::sklearn.exceptions.InconsistentVersionWarning",
+]
